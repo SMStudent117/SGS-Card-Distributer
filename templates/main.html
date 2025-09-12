@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>游戏角色面板</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            height: 100vh;
+        }
+
+        .left,
+        .center,
+        .right {
+            border: 1px solid #123;
+            box-sizing: border-box;
+            padding: 30px;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #c4c4c4;
+            overflow: hidden;
+        }
+
+        .center img {
+            height: 100vh;
+            width: auto;
+            transform-origin: center center;
+        }
+
+        .right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hp-armor {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .stat {
+            text-align: center;
+            margin: 0 5px;
+        }
+
+        .stat button {
+            display: block;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            margin: 4px auto;
+        }
+
+        #hpValue,
+        #armorValue,
+        #maxHpValue {
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            margin: 10px 0;
+            width: 100%;
+        }
+
+        .button-grid button {
+            width: 100%;
+            height: 40px;
+            font-size: 16px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            width: 100%;
+        }
+
+        .action-buttons button {
+            width: 100%;
+            height: 50px;
+            font-size: 16px;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .faction-images {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .faction-images img {
+            width: 100px;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .faction-images img:hover {
+            transform: scale(1.1);
+        }
+
+        #closeModal {
+            margin-top: 20px;
+            padding: 8px 16px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 左侧 -->
+    <div class="left">
+        <img id="factionIcon" src="/static/icons/qun.png" alt="势力" style="width:80px; height:auto; cursor:pointer;">
+        <div style="margin-top: 20px;">
+            <button>标记</button>
+        </div>
+        <!-- 在右侧区域底部增加标记显示区域 -->
+        <div id="markerContainer" style="
+    margin-top: auto; 
+    width: 100%; 
+    max-height: 200px; 
+    overflow-y: auto; 
+    border-top: 1px solid #999; 
+    padding-top: 10px;">
+            <h3 style="text-align:center; margin-bottom:5px;">标记</h3>
+            <div id="markerList"></div>
+        </div>
+
+        <!-- 标记输入弹窗 -->
+        <div id="markerModal" class="modal">
+            <div class="modal-content">
+                <h2>添加标记</h2>
+                <div style="margin:10px 0;">
+                    <label>标记名称: <input type="text" id="markerName"></label>
+                </div>
+                <div style="margin:10px 0;">
+                    <label>数量: <input type="number" id="markerCount" value="1" min="1"></label>
+                </div>
+                <button id="confirmMarker">确定</button>
+                <button id="cancelMarker">取消</button>
+            </div>
+        </div>
+
+        <script>
+            const markerBtn = document.querySelector(".left button"); // 标记按钮
+            const markerModal = document.getElementById("markerModal");
+            const confirmMarker = document.getElementById("confirmMarker");
+            const cancelMarker = document.getElementById("cancelMarker");
+            const markerList = document.getElementById("markerList");
+
+            markerBtn.onclick = function () {
+                markerModal.style.display = "flex";
+            };
+
+            cancelMarker.onclick = function () {
+                markerModal.style.display = "none";
+            };
+
+            confirmMarker.onclick = function () {
+                const name = document.getElementById("markerName").value.trim();
+                let count = parseInt(document.getElementById("markerCount").value);
+                if (!name || isNaN(count) || count <= 0) {
+                    alert("请输入正确的标记信息！");
+                    return;
+                }
+                addMarker(name, count);
+                markerModal.style.display = "none";
+                document.getElementById("markerName").value = "";
+                document.getElementById("markerCount").value = 1;
+            };
+
+            // 添加标记行
+            function addMarker(name, count) {
+                const row = document.createElement("div");
+                row.style.display = "flex";
+                row.style.alignItems = "center";
+                row.style.justifyContent = "space-between";
+                row.style.padding = "5px 0";
+                row.style.borderBottom = "1px solid #ddd";
+
+                const nameSpan = document.createElement("span");
+                nameSpan.textContent = name;
+                nameSpan.style.flex = "1";
+
+                const countSpan = document.createElement("span");
+                countSpan.textContent = count;
+                countSpan.style.width = "30px";
+                countSpan.style.textAlign = "center";
+
+                const btns = document.createElement("div");
+                btns.style.display = "flex";
+                btns.style.gap = "5px";
+
+                const incBtn = document.createElement("button");
+                incBtn.textContent = "▲";
+                incBtn.onclick = () => {
+                    count++;
+                    countSpan.textContent = count;
+                };
+
+                const decBtn = document.createElement("button");
+                decBtn.textContent = "▼";
+                decBtn.onclick = () => {
+                    if (count > 1) {
+                        count--;
+                        countSpan.textContent = count;
+                    }
+                };
+
+                const delBtn = document.createElement("button");
+                delBtn.textContent = "删除";
+                delBtn.onclick = () => {
+                    if (confirm("确定要删除这个标记吗？")) {
+                        row.remove();
+                    }
+                };
+
+                btns.appendChild(incBtn);
+                btns.appendChild(decBtn);
+                btns.appendChild(delBtn);
+
+                row.appendChild(nameSpan);
+                row.appendChild(countSpan);
+                row.appendChild(btns);
+
+                markerList.appendChild(row);
+            }
+        </script>
+    </div>
+
+    <!-- 中间角色区 -->
+    <div class="center">
+        {% if image_file %}
+        <div style="position: relative; display: inline-block;">
+            <img id="characterImage" src="{{ url_for('static', filename=image_file) }}" alt="角色">
+            <img id="chainOverlay" src="/static/icons/chain_mode.png"
+                style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:100%; height:auto; pointer-events:none;">
+        </div>
+        {% else %}
+        <div style="color:white;">⚠️ 没有找到角色图片</div>
+        {% endif %}
+    </div>
+
+    <!-- 右侧 -->
+    <div class="right">
+        <div class="hp-armor">
+            <div class="stat">
+                <div style="display: flex; align-items: center; justify-content: center;">
+                    <div>
+                        <button onclick="changeHp(1)">▲</button>
+                        <button onclick="changeHp(-1)">▼</button>
+                    </div>
+                    <div id="hpValue" style="margin: 0 10px; font-size: 18px; font-weight: bold;">
+                        4/4
+                    </div>
+                    <div>
+                        <button onclick="changeMaxHp(1)">▲</button>
+                        <button onclick="changeMaxHp(-1)">▼</button>
+                    </div>
+                </div>
+                <div>血量/上限</div>
+            </div>
+            <div class="stat">
+                <button onclick="changeArmor(1)">▲</button>
+                <div id="armorValue">0</div>
+                <button onclick="changeArmor(-1)">▼</button>
+                <div>护甲</div>
+            </div>
+        </div>
+
+        <div class="button-grid">
+            <button id="tapButton">横置</button>
+            <button id="flipButton">翻面</button>
+            <button>暗置</button>
+        </div>
+
+        <div class="action-buttons">
+            <button id="decisionBtn">判定区</button>
+            <button id="weaponBtn">武器</button>
+            <button id="armorBtn">防具</button>
+            <button id="atkHorseBtn">进攻马</button>
+            <button id="defHorseBtn">防御马</button>
+            <button id="treasureBtn">宝物</button>
+        </div>
+    </div>
+
+    <!-- 势力选择弹窗 -->
+    <div id="factionModal" class="modal">
+        <div class="modal-content">
+            <h2>选择势力</h2>
+            <div class="faction-images">
+                <img src="/static/icons/wei.png" alt="魏" data-faction="wei">
+                <img src="/static/icons/shu.png" alt="蜀" data-faction="shu">
+                <img src="/static/icons/wu.png" alt="吴" data-faction="wu">
+                <img src="/static/icons/qun.png" alt="群" data-faction="qun">
+                <img src="/static/icons/jin.png" alt="晋" data-faction="jin">
+            </div>
+            <button id="closeModal">返回</button>
+        </div>
+    </div>
+
+    <script>
+        let hp = 4;
+        let maxHp = 4;
+        let armor = 0;
+
+        let isTapped = false;
+        let isFlipped = false;
+
+        const charImg = document.getElementById("characterImage");
+        const chainOverlay = document.getElementById("chainOverlay");
+        const originalSrc = charImg ? charImg.src : "";
+
+        function toggleTap() {
+            if (!charImg) return;
+            isTapped = !isTapped;
+            if (isTapped) {
+                chainOverlay.style.display = "block";
+                chainOverlay.style.width = charImg.clientWidth + "px";
+                tapButton.textContent = "竖置";
+            } else {
+                chainOverlay.style.display = "none";
+                tapButton.textContent = "横置";
+            }
+        }
+
+        function toggleFlip() {
+            if (!charImg) return;
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                charImg.src = "/static/icons/back.jpg";
+            } else {
+                charImg.src = originalSrc;
+            }
+        }
+
+        document.getElementById("tapButton").onclick = toggleTap;
+        document.getElementById("flipButton").onclick = toggleFlip;
+
+        function updateHpDisplay() {
+            const hpDiv = document.getElementById("hpValue");
+            hpDiv.textContent = `${hp}/${maxHp}`;
+            if (maxHp === 0) {
+                hpDiv.style.color = "gray";
+                return;
+            }
+            const percent = hp / maxHp;
+            if (hp === 0) {
+                hpDiv.style.color = "gray";
+            } else if (percent > 0.5) {
+                hpDiv.style.color = "green";
+            } else if (percent > 0.25) {
+                hpDiv.style.color = "orange";
+            } else {
+                hpDiv.style.color = "red";
+            }
+        }
+
+        function updateArmorDisplay() {
+            document.getElementById("armorValue").textContent = armor;
+        }
+
+        function changeHp(delta) {
+            hp += delta;
+            if (hp > maxHp) hp = maxHp;
+            if (hp < 0) hp = 0;
+            updateHpDisplay();
+        }
+
+        function changeMaxHp(delta) {
+            maxHp += delta;
+            if (maxHp < 0) maxHp = 0;
+            if (hp > maxHp) hp = maxHp;
+            updateHpDisplay();
+        }
+
+        function changeArmor(delta) {
+            armor += delta;
+            if (armor > 5) armor = 5;
+            if (armor < 0) armor = 0;
+            updateArmorDisplay();
+        }
+
+        function setupToggleButton(btn) {
+            const originalText = btn.textContent;
+            let isDisabled = false;
+            btn.onclick = function () {
+                isDisabled = !isDisabled;
+                if (isDisabled) {
+                    btn.textContent = originalText + "（已废除）";
+                    btn.style.color = "darkgray";
+                } else {
+                    btn.textContent = originalText;
+                    btn.style.color = "black";
+                }
+            };
+        }
+
+        setupToggleButton(document.getElementById("decisionBtn"));
+        setupToggleButton(document.getElementById("weaponBtn"));
+        setupToggleButton(document.getElementById("armorBtn"));
+        setupToggleButton(document.getElementById("atkHorseBtn"));
+        setupToggleButton(document.getElementById("defHorseBtn"));
+        setupToggleButton(document.getElementById("treasureBtn"));
+
+        updateHpDisplay();
+        updateArmorDisplay();
+
+        // ===== 势力选择逻辑 =====
+        const factionIcon = document.getElementById("factionIcon");
+        const factionModal = document.getElementById("factionModal");
+        const closeModal = document.getElementById("closeModal");
+
+        factionIcon.onclick = function () {
+            factionModal.style.display = "flex";
+        };
+
+        closeModal.onclick = function () {
+            factionModal.style.display = "none";
+        };
+
+        document.querySelectorAll(".faction-images img").forEach(img => {
+            img.addEventListener("click", function () {
+                factionIcon.src = this.src;  // 替换左侧图片
+                factionModal.style.display = "none";  // 关闭弹窗
+            });
+        });
+    </script>
+</body>
+
+</html>

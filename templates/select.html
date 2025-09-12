@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>选择武将</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin: 20px;
+            font-size: 26px;
+        }
+
+        .gallery {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 15px;
+            padding: 20px;
+            overflow-x: auto;
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        .card {
+            flex: 0 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 4px solid transparent;
+            transition: border 0.2s ease;
+            cursor: pointer;
+            background: white;
+        }
+
+        .card img {
+            display: block;
+            width: 160px;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .card.selected {
+            border: 4px solid #ffcc00;
+        }
+
+        .actions {
+            margin-top: 20px;
+        }
+
+        .confirm-btn {
+            padding: 12px 28px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: #ffcc00;
+            color: #333;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>请选择你的武将</h1>
+
+    <div class="gallery" id="gallery">
+        {% for img in candidates %}
+        <div class="card" data-img="{{ img }}">
+            <img src="{{ url_for('static', filename=img.replace('images/', 'images_low/')) }}" alt="武将">
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="status">
+        剩余换将卡：<span id="changeCount">{{ totalCount - heroCount }}</span>
+    </div>
+
+
+    <div class="actions">
+        <button id="changeBtn" class="confirm-btn" disabled>更换</button>
+        <button id="confirmBtn" class="confirm-btn" disabled>确认</button>
+    </div>
+
+    <script>
+        let chosen = null;
+        let heroCount = {{ heroCount }};
+        let allCandidates = {{ candidates| tojson }};
+        let displayed = allCandidates.slice(0, heroCount);
+        let reserves = allCandidates.slice(heroCount);
+
+        const gallery = document.getElementById("gallery");
+        gallery.innerHTML = displayed.map(img => `
+    <div class="card" data-img="${img}">
+        <img src="{{ url_for('static', filename='') }}${img.replace('images/', 'images_low/')}" alt="武将">
+    </div>
+`).join("");
+
+        const cards = () => document.querySelectorAll(".card");
+        const confirmBtn = document.getElementById("confirmBtn");
+        const changeBtn = document.getElementById("changeBtn");
+
+
+        function refreshSelection() {
+            cards().forEach(card => {
+                card.addEventListener("click", () => {
+                    cards().forEach(c => c.classList.remove("selected"));
+                    card.classList.add("selected");
+                    chosen = card.dataset.img;
+                    confirmBtn.disabled = false;
+                    changeBtn.disabled = reserves.length === 0;
+                });
+            });
+        }
+        refreshSelection();
+
+        // 确认
+        confirmBtn.addEventListener("click", () => {
+            if (!chosen) return;
+            fetch("{{ url_for('confirm_selection') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ selected: chosen })
+            }).then(res => {
+                if (res.ok) {
+                    window.location.href = "{{ url_for('character') }}";
+                }
+            });
+        });
+
+        // 更换
+        let remainingChanges = {{ totalCount - heroCount }};
+        const changeCountEl = document.getElementById("changeCount");
+        changeBtn.addEventListener("click", () => {
+            if (!chosen || reserves.length === 0 || remainingChanges <= 0) return;
+            const newImg = reserves.shift();
+            const card = [...cards()].find(c => c.dataset.img === chosen);
+            if (card) {
+                card.dataset.img = newImg;
+                card.querySelector("img").src = "{{ url_for('static', filename='') }}" + newImg.replace("images/", "images_low/");
+                chosen = newImg;
+            }
+            remainingChanges -= 1;
+            changeCountEl.textContent = remainingChanges;
+            changeBtn.disabled = reserves.length === 0 || remainingChanges === 0;
+        });
+    </script>
+</body>
+
+</html>

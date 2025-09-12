@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>游戏启动界面</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px 60px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .container h1 {
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #2a2a2a;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            margin: 12px 0;
+            padding: 14px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-start {
+            background: #2a5298;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #1e3c72;
+        }
+
+        .btn-settings {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-settings:hover {
+            background: #ddd;
+        }
+
+        /* 设置对话框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: left;
+            width: 400px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modal-content label {
+            display: block;
+            margin: 10px 0 6px;
+        }
+
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .modal-actions {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .modal-actions button {
+            margin-left: 10px;
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .modal-actions .save-btn {
+            background: #2a5298;
+            color: white;
+        }
+
+        .modal-actions .cancel-btn {
+            background: #ccc;
+        }
+
+        /* 难度按钮容器：横向平铺 */
+        .difficulty-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 10px 0 20px;
+        }
+
+        /* 每个按钮平分宽度 */
+        .diff-btn {
+            flex: 1;
+            /* 自动平分 */
+            padding: 14px 0;
+            /* 高度更大，方便点 */
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+
+        /* 选中状态 */
+        .diff-btn.active {
+            background: #2a5298;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>欢迎来到 三国杀 网页版</h1>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div style="color: red; margin-bottom: 15px; font-weight: bold;">
+            {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <a id="startGameLink" href="{{ url_for('start_game') }}">
+            <button class="btn btn-start">开始游戏</button>
+        </a>
+
+        <a href="{{ url_for('resume_game') }}">
+            <button class="btn btn-settings">返回游戏</button>
+        </a>
+
+        <button class="btn btn-settings" id="openSettings">设置</button>
+    </div>
+
+    <!-- 设置对话框 -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>游戏设置</h2>
+
+            <!-- 选将框数量 -->
+            <label for="heroCount">选将框数量：</label>
+            <input type="number" id="heroCount" min="3" max="10" value="5">
+
+            <!-- 换将卡数量 -->
+            <label for="changeCount">换将卡数量：</label>
+            <input type="number" id="changeCount" min="0" max="5" value="0">
+
+            <!-- 操作难度偏好 -->
+            <label>操作难度偏好：</label>
+            <div id="difficultyBtns" class="difficulty-container">
+                <button type="button" class="diff-btn" data-value="1">1</button>
+                <button type="button" class="diff-btn" data-value="2">2</button>
+                <button type="button" class="diff-btn" data-value="3">3</button>
+                <button type="button" class="diff-btn" data-value="4">4</button>
+                <button type="button" class="diff-btn" data-value="5">5</button>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelSettings">取消</button>
+                <button class="save-btn" id="saveSettings">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 临时保存设置结果
+        let gameSettings = {
+            heroCount: 5,
+            changeCount: 0,
+            difficulty: [1, 2, 3, 4, 5]
+        };
+
+        const modal = document.getElementById("settingsModal");
+        const openSettingsBtn = document.getElementById("openSettings");
+        const cancelBtn = document.getElementById("cancelSettings");
+        const saveBtn = document.getElementById("saveSettings");
+        const startGameLink = document.getElementById("startGameLink");
+
+        // 打开设置时同步
+        openSettingsBtn.onclick = () => {
+            modal.style.display = "flex";
+            document.getElementById("heroCount").value = gameSettings.heroCount;
+            document.getElementById("changeCount").value = gameSettings.changeCount;
+            updateDifficultyButtons();
+        };
+
+        // 取消
+        cancelBtn.onclick = () => {
+            modal.style.display = "none";
+        };
+
+        // 保存
+        saveBtn.onclick = () => {
+            gameSettings.heroCount = parseInt(document.getElementById("heroCount").value, 10);
+            gameSettings.changeCount = parseInt(document.getElementById("changeCount").value, 10);
+            modal.style.display = "none";
+        };
+
+        // 难度选择逻辑
+        const diffBtns = document.querySelectorAll(".diff-btn");
+        diffBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const val = parseInt(btn.dataset.value);
+                if (gameSettings.difficulty.includes(val)) {
+                    if (gameSettings.difficulty.length > 1) {
+                        gameSettings.difficulty = gameSettings.difficulty.filter(x => x !== val);
+                    }
+                } else {
+                    gameSettings.difficulty.push(val);
+                }
+                updateDifficultyButtons();
+            });
+        });
+
+        function updateDifficultyButtons() {
+            diffBtns.forEach(btn => {
+                const val = parseInt(btn.dataset.value);
+                if (gameSettings.difficulty.includes(val)) {
+                    btn.classList.add("active");
+                } else {
+                    btn.classList.remove("active");
+                }
+            });
+        }
+        updateDifficultyButtons(); // 初始化
+
+        // 开始游戏时传参
+        startGameLink.onclick = (e) => {
+            e.preventDefault();
+            const url = "{{ url_for('start_game') }}" +
+                "?heroCount=" + encodeURIComponent(gameSettings.heroCount) +
+                "&changeCount=" + encodeURIComponent(gameSettings.changeCount) +
+                "&difficulty=" + encodeURIComponent(gameSettings.difficulty.join(","));
+            window.location.href = url;
+        };
+    </script>
+</body>
+
+</html>

@@ -41,11 +41,25 @@
             align-items: center;
         }
 
+        /* 血量模块 */
+        .hp-container {
+            border: 2px solid #666;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .hp-container h3 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
         .hp-armor {
             display: flex;
             justify-content: space-around;
             width: 100%;
-            margin-bottom: 10px;
         }
 
         .stat {
@@ -62,38 +76,38 @@
         }
 
         #hpValue,
-        #armorValue,
-        #maxHpValue {
+        #armorValue {
             font-weight: bold;
             padding: 5px;
             border-radius: 4px;
+            font-size: 24px;
+        }
+
+        /* 快速操作模块 */
+        .quick-ops {
+            border: 2px solid #666;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .quick-ops h3 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
         }
 
         .button-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 5px;
-            margin: 10px 0;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
             width: 100%;
         }
 
         .button-grid button {
             width: 100%;
             height: 40px;
-            font-size: 16px;
-        }
-
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: repeat(3, 1fr);
-            gap: 5px;
-            width: 100%;
-        }
-
-        .action-buttons button {
-            width: 100%;
-            height: 50px;
             font-size: 16px;
         }
 
@@ -140,10 +154,49 @@
             transform: scale(1.1);
         }
 
-        #closeModal {
+        #closeModal,
+        #closeAbolishModal {
             margin-top: 20px;
             padding: 8px 16px;
             font-size: 16px;
+        }
+
+        /* 废除弹窗 */
+        .abolish-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .abolish-buttons button {
+            height: 50px;
+            font-size: 16px;
+        }
+
+        .suit {
+            font-size: 15px;
+            font-weight: bold;
+            color: transparent;
+            /* 隐藏原始字体颜色 */
+            text-shadow: 0 0 0 gray;
+            /* 初始灰色 */
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            background: white;
+        }
+
+        /* 激活状态：不同花色显示不同颜色 */
+        .suit.active.spade,
+        .suit.active.club {
+            text-shadow: 0 0 0 black;
+        }
+
+        .suit.active.heart,
+        .suit.active.diamond {
+            text-shadow: 0 0 0 red;
         }
     </style>
 </head>
@@ -151,20 +204,32 @@
 <body>
     <!-- 左侧 -->
     <div class="left">
-        <img id="factionIcon" src="/static/icons/qun.png" alt="势力" style="width:80px; height:auto; cursor:pointer;">
-        <div style="margin-top: 20px;">
-            <button>标记</button>
+        <!-- 基础信息模块 -->
+        <div class="info-container"
+            style="border: 2px solid #666; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 15px;">
+            <h3 style="text-align:center; margin-top:0; margin-bottom:10px;">基础信息</h3>
+            <div style="display:flex; justify-content:space-around; align-items:center;">
+                <img id="factionIcon" src="/static/icons/qun.png" alt="势力"
+                    style="width:50px; height:auto; cursor:pointer;">
+                <div style="font-size:20px; font-weight:bold;">查看身份</div>
+            </div>
         </div>
-        <!-- 在右侧区域底部增加标记显示区域 -->
-        <div id="markerContainer" style="
-    margin-top: auto; 
-    width: 100%; 
-    max-height: 200px; 
-    overflow-y: auto; 
-    border-top: 1px solid #999; 
-    padding-top: 10px;">
-            <h3 style="text-align:center; margin-bottom:5px;">标记</h3>
-            <div id="markerList"></div>
+
+        <!-- 标记模块 -->
+        <div class="marker-container"
+            style="border: 2px solid #666; border-radius: 8px; padding: 10px; width: 100%; flex-grow:1; display:flex; flex-direction:column;">
+            <h3 style="text-align:center; margin-top:0; margin-bottom:10px;">标记</h3>
+            <button style="margin-bottom:10px;">添加标记</button>
+            <!-- 花色按钮区域 -->
+            <div class="suit-buttons" style="display:flex; justify-content:space-around; margin-bottom:10px;">
+                <button class="suit spade">♠</button>
+                <button class="suit heart">♥</button>
+                <button class="suit diamond">♦</button>
+                <button class="suit club">♣</button>
+            </div>
+            <div id="markerContainer" style="flex-grow:1; overflow-y:auto;">
+                <div id="markerList"></div>
+            </div>
         </div>
 
         <!-- 标记输入弹窗 -->
@@ -181,92 +246,6 @@
                 <button id="cancelMarker">取消</button>
             </div>
         </div>
-
-        <script>
-            const markerBtn = document.querySelector(".left button"); // 标记按钮
-            const markerModal = document.getElementById("markerModal");
-            const confirmMarker = document.getElementById("confirmMarker");
-            const cancelMarker = document.getElementById("cancelMarker");
-            const markerList = document.getElementById("markerList");
-
-            markerBtn.onclick = function () {
-                markerModal.style.display = "flex";
-            };
-
-            cancelMarker.onclick = function () {
-                markerModal.style.display = "none";
-            };
-
-            confirmMarker.onclick = function () {
-                const name = document.getElementById("markerName").value.trim();
-                let count = parseInt(document.getElementById("markerCount").value);
-                if (!name || isNaN(count) || count <= 0) {
-                    alert("请输入正确的标记信息！");
-                    return;
-                }
-                addMarker(name, count);
-                markerModal.style.display = "none";
-                document.getElementById("markerName").value = "";
-                document.getElementById("markerCount").value = 1;
-            };
-
-            // 添加标记行
-            function addMarker(name, count) {
-                const row = document.createElement("div");
-                row.style.display = "flex";
-                row.style.alignItems = "center";
-                row.style.justifyContent = "space-between";
-                row.style.padding = "5px 0";
-                row.style.borderBottom = "1px solid #ddd";
-
-                const nameSpan = document.createElement("span");
-                nameSpan.textContent = name;
-                nameSpan.style.flex = "1";
-
-                const countSpan = document.createElement("span");
-                countSpan.textContent = count;
-                countSpan.style.width = "30px";
-                countSpan.style.textAlign = "center";
-
-                const btns = document.createElement("div");
-                btns.style.display = "flex";
-                btns.style.gap = "5px";
-
-                const incBtn = document.createElement("button");
-                incBtn.textContent = "▲";
-                incBtn.onclick = () => {
-                    count++;
-                    countSpan.textContent = count;
-                };
-
-                const decBtn = document.createElement("button");
-                decBtn.textContent = "▼";
-                decBtn.onclick = () => {
-                    if (count > 1) {
-                        count--;
-                        countSpan.textContent = count;
-                    }
-                };
-
-                const delBtn = document.createElement("button");
-                delBtn.textContent = "删除";
-                delBtn.onclick = () => {
-                    if (confirm("确定要删除这个标记吗？")) {
-                        row.remove();
-                    }
-                };
-
-                btns.appendChild(incBtn);
-                btns.appendChild(decBtn);
-                btns.appendChild(delBtn);
-
-                row.appendChild(nameSpan);
-                row.appendChild(countSpan);
-                row.appendChild(btns);
-
-                markerList.appendChild(row);
-            }
-        </script>
     </div>
 
     <!-- 中间角色区 -->
@@ -284,44 +263,58 @@
 
     <!-- 右侧 -->
     <div class="right">
-        <div class="hp-armor">
-            <div class="stat">
-                <div style="display: flex; align-items: center; justify-content: center;">
-                    <div>
-                        <button onclick="changeHp(1)">▲</button>
-                        <button onclick="changeHp(-1)">▼</button>
+        <!-- 血量模块 -->
+        <div class="hp-container">
+            <h3>血量</h3>
+            <div class="hp-armor">
+                <div class="stat">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <div>
+                            <button onclick="changeHp(1)">▲</button>
+                            <button onclick="changeHp(-1)">▼</button>
+                        </div>
+                        <div id="hpValue" style="margin: 0 10px;">4/4</div>
+                        <div>
+                            <button onclick="changeMaxHp(1)">▲</button>
+                            <button onclick="changeMaxHp(-1)">▼</button>
+                        </div>
                     </div>
-                    <div id="hpValue" style="margin: 0 10px; font-size: 18px; font-weight: bold;">
-                        4/4
-                    </div>
-                    <div>
-                        <button onclick="changeMaxHp(1)">▲</button>
-                        <button onclick="changeMaxHp(-1)">▼</button>
-                    </div>
+                    <div>血量/上限</div>
                 </div>
-                <div>血量/上限</div>
-            </div>
-            <div class="stat">
-                <button onclick="changeArmor(1)">▲</button>
-                <div id="armorValue">0</div>
-                <button onclick="changeArmor(-1)">▼</button>
-                <div>护甲</div>
+                <div class="stat">
+                    <button onclick="changeArmor(1)">▲</button>
+                    <div id="armorValue">0</div>
+                    <button onclick="changeArmor(-1)">▼</button>
+                    <div>护甲</div>
+                </div>
             </div>
         </div>
 
-        <div class="button-grid">
-            <button id="tapButton">横置</button>
-            <button id="flipButton">翻面</button>
-            <button>暗置</button>
+        <!-- 快速操作模块 -->
+        <div class="quick-ops">
+            <h3>快速操作</h3>
+            <div class="button-grid">
+                <button id="tapButton">横置</button>
+                <button id="flipButton">翻面</button>
+                <button>暗置</button>
+                <button id="abolishButton">废除</button>
+            </div>
         </div>
+    </div>
 
-        <div class="action-buttons">
-            <button id="decisionBtn">判定区</button>
-            <button id="weaponBtn">武器</button>
-            <button id="armorBtn">防具</button>
-            <button id="atkHorseBtn">进攻马</button>
-            <button id="defHorseBtn">防御马</button>
-            <button id="treasureBtn">宝物</button>
+    <!-- 废除弹窗 -->
+    <div id="abolishModal" class="modal">
+        <div class="modal-content">
+            <h2>选择需要废除/复原的区域</h2>
+            <div class="abolish-buttons">
+                <button>判定区</button>
+                <button>武器</button>
+                <button>防具</button>
+                <button>进攻马</button>
+                <button>防御马</button>
+                <button>宝物</button>
+            </div>
+            <button id="closeAbolishModal">返回</button>
         </div>
     </div>
 
@@ -330,21 +323,21 @@
         <div class="modal-content">
             <h2>选择势力</h2>
             <div class="faction-images">
-                <img src="/static/icons/wei.png" alt="魏" data-faction="wei">
-                <img src="/static/icons/shu.png" alt="蜀" data-faction="shu">
-                <img src="/static/icons/wu.png" alt="吴" data-faction="wu">
-                <img src="/static/icons/qun.png" alt="群" data-faction="qun">
-                <img src="/static/icons/jin.png" alt="晋" data-faction="jin">
+                <img src="/static/icons/wei.png" alt="魏">
+                <img src="/static/icons/shu.png" alt="蜀">
+                <img src="/static/icons/wu.png" alt="吴">
+                <img src="/static/icons/qun.png" alt="群">
+                <img src="/static/icons/jin.png" alt="晋">
             </div>
             <button id="closeModal">返回</button>
         </div>
     </div>
 
     <script>
+        // === 状态数据 ===
         let hp = 4;
         let maxHp = 4;
         let armor = 0;
-
         let isTapped = false;
         let isFlipped = false;
 
@@ -352,7 +345,45 @@
         const chainOverlay = document.getElementById("chainOverlay");
         const originalSrc = charImg ? charImg.src : "";
 
-        function toggleTap() {
+        // === 血量与护甲 ===
+        function updateHpDisplay() {
+            const hpDiv = document.getElementById("hpValue");
+            hpDiv.textContent = `${hp}/${maxHp}`;
+            if (maxHp === 0 || hp === 0) {
+                hpDiv.style.color = "gray";
+            } else if (hp === maxHp) {
+                hpDiv.style.color = "green";
+            } else if (hp === 2) {
+                hpDiv.style.color = "orange";
+            } else if (hp === 1) {
+                hpDiv.style.color = "red";
+            } else {
+                hpDiv.style.color = "green";
+            }
+        }
+
+        function updateArmorDisplay() {
+            document.getElementById("armorValue").textContent = armor;
+        }
+
+        function changeHp(delta) {
+            hp = Math.max(0, Math.min(maxHp, hp + delta));
+            updateHpDisplay();
+        }
+
+        function changeMaxHp(delta) {
+            maxHp = Math.max(0, maxHp + delta);
+            if (hp > maxHp) hp = maxHp;
+            updateHpDisplay();
+        }
+
+        function changeArmor(delta) {
+            armor = Math.max(0, Math.min(5, armor + delta));
+            updateArmorDisplay();
+        }
+
+        // === 横置、翻面 ===
+        document.getElementById("tapButton").onclick = () => {
             if (!charImg) return;
             isTapped = !isTapped;
             if (isTapped) {
@@ -363,109 +394,124 @@
                 chainOverlay.style.display = "none";
                 tapButton.textContent = "横置";
             }
-        }
+        };
 
-        function toggleFlip() {
+        document.getElementById("flipButton").onclick = () => {
             if (!charImg) return;
             isFlipped = !isFlipped;
-            if (isFlipped) {
-                charImg.src = "/static/icons/back.jpg";
-            } else {
-                charImg.src = originalSrc;
-            }
-        }
+            charImg.src = isFlipped ? "/static/icons/back.jpg" : originalSrc;
+        };
 
-        document.getElementById("tapButton").onclick = toggleTap;
-        document.getElementById("flipButton").onclick = toggleFlip;
+        // === 废除弹窗 ===
+        const abolishButton = document.getElementById("abolishButton");
+        const abolishModal = document.getElementById("abolishModal");
+        const closeAbolishModal = document.getElementById("closeAbolishModal");
 
-        function updateHpDisplay() {
-            const hpDiv = document.getElementById("hpValue");
-            hpDiv.textContent = `${hp}/${maxHp}`;
-            if (maxHp === 0) {
-                hpDiv.style.color = "gray";
-                return;
-            }
-            const percent = hp / maxHp;
-            if (hp === 0) {
-                hpDiv.style.color = "gray";
-            } else if (percent > 0.5) {
-                hpDiv.style.color = "green";
-            } else if (percent > 0.25) {
-                hpDiv.style.color = "orange";
-            } else {
-                hpDiv.style.color = "red";
-            }
-        }
+        abolishButton.onclick = () => abolishModal.style.display = "flex";
+        closeAbolishModal.onclick = () => abolishModal.style.display = "none";
 
-        function updateArmorDisplay() {
-            document.getElementById("armorValue").textContent = armor;
-        }
-
-        function changeHp(delta) {
-            hp += delta;
-            if (hp > maxHp) hp = maxHp;
-            if (hp < 0) hp = 0;
-            updateHpDisplay();
-        }
-
-        function changeMaxHp(delta) {
-            maxHp += delta;
-            if (maxHp < 0) maxHp = 0;
-            if (hp > maxHp) hp = maxHp;
-            updateHpDisplay();
-        }
-
-        function changeArmor(delta) {
-            armor += delta;
-            if (armor > 5) armor = 5;
-            if (armor < 0) armor = 0;
-            updateArmorDisplay();
-        }
-
-        function setupToggleButton(btn) {
-            const originalText = btn.textContent;
-            let isDisabled = false;
-            btn.onclick = function () {
-                isDisabled = !isDisabled;
-                if (isDisabled) {
-                    btn.textContent = originalText + "（已废除）";
-                    btn.style.color = "darkgray";
-                } else {
-                    btn.textContent = originalText;
-                    btn.style.color = "black";
-                }
-            };
-        }
-
-        setupToggleButton(document.getElementById("decisionBtn"));
-        setupToggleButton(document.getElementById("weaponBtn"));
-        setupToggleButton(document.getElementById("armorBtn"));
-        setupToggleButton(document.getElementById("atkHorseBtn"));
-        setupToggleButton(document.getElementById("defHorseBtn"));
-        setupToggleButton(document.getElementById("treasureBtn"));
-
-        updateHpDisplay();
-        updateArmorDisplay();
-
-        // ===== 势力选择逻辑 =====
+        // === 势力选择 ===
         const factionIcon = document.getElementById("factionIcon");
         const factionModal = document.getElementById("factionModal");
         const closeModal = document.getElementById("closeModal");
 
-        factionIcon.onclick = function () {
-            factionModal.style.display = "flex";
-        };
-
-        closeModal.onclick = function () {
-            factionModal.style.display = "none";
-        };
+        factionIcon.onclick = () => factionModal.style.display = "flex";
+        closeModal.onclick = () => factionModal.style.display = "none";
 
         document.querySelectorAll(".faction-images img").forEach(img => {
             img.addEventListener("click", function () {
-                factionIcon.src = this.src;  // 替换左侧图片
-                factionModal.style.display = "none";  // 关闭弹窗
+                factionIcon.src = this.src;
+                factionModal.style.display = "none";
             });
         });
+
+        // === 标记功能 ===
+        const markerBtn = document.querySelector(".left button");
+        const markerModal = document.getElementById("markerModal");
+        const confirmMarker = document.getElementById("confirmMarker");
+        const cancelMarker = document.getElementById("cancelMarker");
+        const markerList = document.getElementById("markerList");
+
+        markerBtn.onclick = () => markerModal.style.display = "flex";
+        cancelMarker.onclick = () => markerModal.style.display = "none";
+
+        confirmMarker.onclick = () => {
+            const name = document.getElementById("markerName").value.trim();
+            let count = parseInt(document.getElementById("markerCount").value);
+            if (!name || isNaN(count) || count <= 0) {
+                alert("请输入正确的标记信息！");
+                return;
+            }
+            addMarker(name, count);
+            markerModal.style.display = "none";
+            document.getElementById("markerName").value = "";
+            document.getElementById("markerCount").value = 1;
+        };
+
+        function addMarker(name, count) {
+            const row = document.createElement("div");
+            row.style.display = "flex";
+            row.style.alignItems = "center";
+            row.style.justifyContent = "space-between";
+            row.style.padding = "5px 0";
+            row.style.borderBottom = "1px solid #ddd";
+
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = name;
+            nameSpan.style.flex = "1";
+
+            const countSpan = document.createElement("span");
+            countSpan.textContent = count;
+            countSpan.style.width = "30px";
+            countSpan.style.textAlign = "center";
+
+            const btns = document.createElement("div");
+            btns.style.display = "flex";
+            btns.style.gap = "5px";
+
+            const incBtn = document.createElement("button");
+            incBtn.textContent = "▲";
+            incBtn.onclick = () => {
+                count++;
+                countSpan.textContent = count;
+            };
+
+            const decBtn = document.createElement("button");
+            decBtn.textContent = "▼";
+            decBtn.onclick = () => {
+                if (count > 1) {
+                    count--;
+                    countSpan.textContent = count;
+                }
+            };
+
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "X";
+            delBtn.onclick = () => {
+                if (confirm("确定要删除这个标记吗？")) {
+                    row.remove();
+                }
+            };
+
+            btns.appendChild(incBtn);
+            btns.appendChild(decBtn);
+            btns.appendChild(delBtn);
+
+            row.appendChild(nameSpan);
+            row.appendChild(countSpan);
+            row.appendChild(btns);
+
+            markerList.appendChild(row);
+        }
+
+        document.querySelectorAll(".suit").forEach(btn => {
+            btn.addEventListener("click", () => {
+                btn.classList.toggle("active");
+            });
+        });
+        // === 初始化显示 ===
+        updateHpDisplay();
+        updateArmorDisplay();
     </script>
 </body>
 

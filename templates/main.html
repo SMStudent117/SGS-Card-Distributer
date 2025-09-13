@@ -211,7 +211,13 @@
             <div style="display:flex; justify-content:space-around; align-items:center;">
                 <img id="factionIcon" src="/static/icons/qun.png" alt="势力"
                     style="width:50px; height:auto; cursor:pointer;">
-                <div style="font-size:20px; font-weight:bold;">查看身份</div>
+                <div id="roleSection" style="font-size:20px; font-weight:bold; cursor:pointer;">
+                    {% if role == "主公" %}
+                    <span style="color:darkred;">主公</span>
+                    {% else %}
+                    查看身份
+                    {% endif %}
+                </div>
             </div>
         </div>
 
@@ -332,7 +338,13 @@
             <button id="closeModal">返回</button>
         </div>
     </div>
-
+    <!-- 身份弹窗 -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <h2>你的身份是：{{ role }}</h2>
+            <button id="closeRoleModal">关闭</button>
+        </div>
+    </div>
     <script>
         // === 状态数据 ===
         let hp = 4;
@@ -509,6 +521,18 @@
                 btn.classList.toggle("active");
             });
         });
+
+        // === 查看身份功能 ===
+        const roleSection = document.getElementById("roleSection");
+        const roleModal = document.getElementById("roleModal");
+        const closeRoleModal = document.getElementById("closeRoleModal");
+
+        if (roleSection && roleSection.textContent.trim() === "查看身份") {
+            roleSection.onclick = () => roleModal.style.display = "flex";
+        }
+        if (closeRoleModal) {
+            closeRoleModal.onclick = () => roleModal.style.display = "none";
+        }
         // === 初始化显示 ===
         updateHpDisplay();
         updateArmorDisplay();

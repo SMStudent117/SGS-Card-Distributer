@@ -89,8 +89,20 @@
     <div class="status">
         剩余换将卡：<span id="changeCount">{{ totalCount - heroCount }}</span>
     </div>
-
-
+    <div style="
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 15px;
+    border-radius: 8px;">
+        你的身份是：
+        <span style="color: {{ 'darkred' if role == '主公' else 'white' }}">
+            {{ role }}
+        </span>
+    </div>
     <div class="actions">
         <button id="changeBtn" class="confirm-btn" disabled>更换</button>
         <button id="confirmBtn" class="confirm-btn" disabled>确认</button>
@@ -129,14 +141,15 @@
         refreshSelection();
 
         // 确认
+        // 确认时带回身份
         confirmBtn.addEventListener("click", () => {
             if (!chosen) return;
             fetch("{{ url_for('confirm_selection') }}", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ selected: chosen })
-            }).then(res => {
-                if (res.ok) {
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
                     window.location.href = "{{ url_for('character') }}";
                 }
             });

@@ -422,6 +422,31 @@
         abolishButton.onclick = () => abolishModal.style.display = "flex";
         closeAbolishModal.onclick = () => abolishModal.style.display = "none";
 
+        // 监听六个废除按钮
+        const abolishBtns = abolishModal.querySelectorAll(".abolish-buttons button");
+        abolishBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const name = btn.textContent.trim();
+                const markerList = document.getElementById("markerList");
+
+                // 查找是否已有对应的“XX已废除”
+                let existing = markerList.querySelector(`[data-abolish="${name}"]`);
+                if (existing) {
+                    // 已经存在则删除
+                    existing.remove();
+                } else {
+                    // 否则添加
+                    const row = document.createElement("div");
+                    row.textContent = `${name}已废除`;
+                    row.setAttribute("data-abolish", name);
+                    row.style.color = "gray";
+                    row.style.fontStyle = "italic";
+                    row.style.padding = "3px 0";
+                    markerList.appendChild(row);
+                }
+            });
+        });
+
         // === 势力选择 ===
         const factionIcon = document.getElementById("factionIcon");
         const factionModal = document.getElementById("factionModal");

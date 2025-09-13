@@ -22,7 +22,7 @@ debug-xxx
 ### Step 1：拉取项目代码
 第一次参与项目时，先克隆仓库：
 ```bash
-git clone https://github.com/你的用户名/仓库名.git
+git clone https://github.com/SMStudent117/SGS-Card-Distributer.git
 cd 仓库名
 如果仓库已经存在，更新最新代码：
 git checkout master

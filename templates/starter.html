@@ -183,15 +183,6 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <h2>游戏设置</h2>
-
-            <!-- 选将框数量 -->
-            <label for="heroCount">选将框数量：</label>
-            <input type="number" id="heroCount" min="3" max="10" value="5">
-
-            <!-- 换将卡数量 -->
-            <label for="changeCount">换将卡数量：</label>
-            <input type="number" id="changeCount" min="0" max="5" value="0">
-
             <!-- 操作难度偏好 -->
             <label>操作难度偏好：</label>
             <div id="difficultyBtns" class="difficulty-container">
@@ -210,74 +201,68 @@
     </div>
 
     <script>
-        // 临时保存设置结果
-        let gameSettings = {
-            heroCount: 5,
-            changeCount: 0,
-            difficulty: [1, 2, 3, 4, 5]
-        };
-
-        const modal = document.getElementById("settingsModal");
+        /* ===== 获取 DOM 元素 ===== */
         const openSettingsBtn = document.getElementById("openSettings");
-        const cancelBtn = document.getElementById("cancelSettings");
+        const modal = document.getElementById("settingsModal");
         const saveBtn = document.getElementById("saveSettings");
-        const startGameLink = document.getElementById("startGameLink");
-
-        // 打开设置时同步
-        openSettingsBtn.onclick = () => {
-            modal.style.display = "flex";
-            document.getElementById("heroCount").value = gameSettings.heroCount;
-            document.getElementById("changeCount").value = gameSettings.changeCount;
-            updateDifficultyButtons();
-        };
-
-        // 取消
-        cancelBtn.onclick = () => {
-            modal.style.display = "none";
-        };
-
-        // 保存
-        saveBtn.onclick = () => {
-            gameSettings.heroCount = parseInt(document.getElementById("heroCount").value, 10);
-            gameSettings.changeCount = parseInt(document.getElementById("changeCount").value, 10);
-            modal.style.display = "none";
-        };
-
-        // 难度选择逻辑
+        const cancelBtn = document.getElementById("cancelSettings");
         const diffBtns = document.querySelectorAll(".diff-btn");
+        const startGameLink = document.getElementById("startGameLink");
+        /* ===== 1. 正式配置 ===== */
+        let officialSettings = {
+            difficulty: [1, 2, 3, 4, 5]   // 第一次默认值
+        };
+
+        /* ===== 2. 打开设置 ===== */
+        openSettingsBtn.onclick = () => {
+            // 每次打开都用「正式值」初始化弹窗
+            tempSettings = { ...officialSettings };          // 深拷贝
+            syncModalFrom(tempSettings);                   // 把值刷到界面
+            modal.style.display = "flex";
+        };
+
+        /* ===== 3. 弹窗里用的临时变量 ===== */
+        let tempSettings = null;   // 只在弹窗打开时存在
+
+        /* ===== 4. 把内存对象同步到界面 ===== */
+        function syncModalFrom(obj) {
+            // 难度按钮
+            diffBtns.forEach(btn => {
+                const v = parseInt(btn.dataset.value);
+                btn.classList.toggle('active', obj.difficulty.includes(v));
+            });
+        }
+
+        /* ===== 5. 难度按钮点击（只改临时变量） ===== */
         diffBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                const val = parseInt(btn.dataset.value);
-                if (gameSettings.difficulty.includes(val)) {
-                    if (gameSettings.difficulty.length > 1) {
-                        gameSettings.difficulty = gameSettings.difficulty.filter(x => x !== val);
-                    }
+            btn.addEventListener('click', () => {
+                const v = parseInt(btn.dataset.value);
+                if (tempSettings.difficulty.includes(v)) {
+                    if (tempSettings.difficulty.length > 1)
+                        tempSettings.difficulty = tempSettings.difficulty.filter(x => x !== v);
                 } else {
-                    gameSettings.difficulty.push(val);
+                    tempSettings.difficulty.push(v);
                 }
-                updateDifficultyButtons();
+                syncModalFrom(tempSettings);   // 立即刷新按钮样式
             });
         });
 
-        function updateDifficultyButtons() {
-            diffBtns.forEach(btn => {
-                const val = parseInt(btn.dataset.value);
-                if (gameSettings.difficulty.includes(val)) {
-                    btn.classList.add("active");
-                } else {
-                    btn.classList.remove("active");
-                }
-            });
-        }
-        updateDifficultyButtons(); // 初始化
+        /* ===== 6. 保存 ===== */
+        saveBtn.onclick = () => {
+            officialSettings = { ...tempSettings };  // 正式值更新
+            modal.style.display = "none";
+        };
 
-        // 开始游戏时传参
+        /* ===== 7. 取消 ===== */
+        cancelBtn.onclick = () => {
+            modal.style.display = "none";  // 什么都不改，直接关
+        };
+
+        /* ===== 8. 开始游戏链接只用正式值 ===== */
         startGameLink.onclick = (e) => {
             e.preventDefault();
             const url = "{{ url_for('start_game') }}" +
-                "?heroCount=" + encodeURIComponent(gameSettings.heroCount) +
-                "&changeCount=" + encodeURIComponent(gameSettings.changeCount) +
-                "&difficulty=" + encodeURIComponent(gameSettings.difficulty.join(","));
+                "?difficulty=" + encodeURIComponent(officialSettings.difficulty.join(","));
             window.location.href = url;
         };
     </script>

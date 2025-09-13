@@ -13,7 +13,8 @@ game_state = {
     "player_count": 1,        # 玩家总数
     "current_players": set()  # 本局已进入的玩家
 }
-
+GLOBAL_HERO_COUNT = 10          # 选将框数量
+GLOBAL_CHANGE_COUNT = 5        # 换将卡数量
 # === 数据加载 ===
 DATA_PATH = "C:/Users/33912/PycharmProjects/SGS/data/data_core.xlsx"
 heroes_df = pd.read_excel(DATA_PATH)
@@ -58,13 +59,11 @@ def start_game():
     session['user_id'] = user_id
 
     # 获取参数
-    hero_count = request.args.get("heroCount", default=5, type=int)
-    change_count = request.args.get("changeCount", default=0, type=int)
     difficulty = request.args.get("difficulty", default="1,2,3,4,5")
 
     session['settings'] = {
-        "heroCount": hero_count,
-        "changeCount": change_count,
+        "heroCount": GLOBAL_HERO_COUNT,
+        "changeCount": GLOBAL_CHANGE_COUNT,
         "difficulty": [int(x) for x in difficulty.split(",") if x.isdigit()]
     }
 

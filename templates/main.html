@@ -258,7 +258,7 @@
     <div class="center">
         {% if image_file %}
         <div style="position: relative; display: inline-block;">
-            <img id="characterImage" src="{{ url_for('static', filename=image_file) }}" alt="角色">
+            <img id="characterImage" src="{{ url_for('static', filename=image_file)}}" alt="角色">
             <img id="chainOverlay" src="/static/icons/chain_mode.png"
                 style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:100%; height:auto; pointer-events:none;">
         </div>
@@ -558,6 +558,16 @@
         if (closeRoleModal) {
             closeRoleModal.onclick = () => roleModal.style.display = "none";
         }
+
+        // === 图片切换功能 ===
+        if (charImg) {
+            let showingA = true;
+            charImg.addEventListener("click", () => {
+                showingA = !showingA;
+                charImg.src = showingA ? charImg.dataset.imgA : charImg.dataset.imgB;
+            });
+        }
+
         // === 初始化显示 ===
         updateHpDisplay();
         updateArmorDisplay();

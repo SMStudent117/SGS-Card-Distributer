@@ -99,7 +99,14 @@
     padding: 10px 15px;
     border-radius: 8px;">
         你的身份是：
-        <span style="color: {{ 'darkred' if role == '主公' else 'white' }}">
+        <span style="
+            color: {% if role == '主公' %}darkred
+           {% elif role == '忠臣' %}yellow
+           {% elif role == '反贼' %}darkgreen
+           {% elif role == '内奸' %}blue
+           {% else %}white
+           {% endif %};
+        ">
             {{ role }}
         </span>
     </div>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>游戏启动界面</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+
+            /* 使用背景图替换原本的渐变色 */
+            background: url("/static/icons/frameback.jpg") no-repeat center center fixed;
+            background-size: cover;
+            /* 自适应屏幕，保持比例并覆盖整个区域 */
+        }
+
+        .container {
+            background: url("/static/icons/baseframe.png") no-repeat center center;
+            background-size: contain;
+            /* 保持比例，适应容器大小 */
+            background-color: transparent;
+            
+
+            width: 600px;
+            /* 可以按需要固定宽高 */
+            height: 400px;
+            /* 不缩放时要给个尺寸，否则只有内容大小 */
+            display: flex;
+            flex-direction: column;   /* 垂直排列 */
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 60px;
+        }
+
+        .container h1 {
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #2a2a2a;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            margin: 12px 0;
+            padding: 14px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        /* 设置对话框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: left;
+            width: 400px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modal-content label {
+            display: block;
+            margin: 10px 0 6px;
+        }
+
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .modal-actions {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .modal-actions button {
+            margin-left: 10px;
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .modal-actions .save-btn {
+            background: #2a5298;
+            color: white;
+        }
+
+        .modal-actions .cancel-btn {
+            background: #ccc;
+        }
+
+        /* 难度按钮容器：横向平铺 */
+        .difficulty-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 10px 0 20px;
+        }
+
+        /* 每个按钮平分宽度 */
+        .diff-btn {
+            flex: 1;
+            /* 自动平分 */
+            padding: 14px 0;
+            /* 高度更大，方便点 */
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+
+        /* 选中状态 */
+        .diff-btn.active {
+            background: #2a5298;
+            color: white;
+        }
+
+        .menu-btn {
+            position: relative;
+            display: block;
+            width: 400px;
+            /* 可以先固定，后面可自适应 */
+            height: 70px;
+            margin: -10px 0;
+            background: url("/static/icons/menu_btn.png") no-repeat center center;
+            background-size: contain;
+            border: none;
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+
+        .menu-btn:hover,
+        .menu-btn:active {
+            filter: brightness(1.2);
+        }
+
+        .menu-btn span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div style="color: red; margin-bottom: 15px; font-weight: bold;">
+            {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <a id="startGameLink" href="{{ url_for('start_game') }}">
+            <button class="menu-btn"><span>开始游戏</span></button>
+        </a>
+
+        <a href="{{ url_for('resume_game') }}">
+            <button class="menu-btn"><span>返回游戏</span></button>
+        </a>
+
+        <button class="menu-btn" id="openSettings"><span>设置</span></button>
+
+    </div>
+
+    <!-- 设置对话框 -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>游戏设置</h2>
+            <!-- 操作难度偏好 -->
+            <label>操作难度偏好：</label>
+            <div id="difficultyBtns" class="difficulty-container">
+                <button type="button" class="diff-btn" data-value="1">1</button>
+                <button type="button" class="diff-btn" data-value="2">2</button>
+                <button type="button" class="diff-btn" data-value="3">3</button>
+                <button type="button" class="diff-btn" data-value="4">4</button>
+                <button type="button" class="diff-btn" data-value="5">5</button>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelSettings">取消</button>
+                <button class="save-btn" id="saveSettings">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div
+        style="position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 14px; color: white; opacity: 0.8;">
+        测试版本，不代表最终品质
+    </div>
+
+    <script>
+        /* ===== 获取 DOM 元素 ===== */
+        const openSettingsBtn = document.getElementById("openSettings");
+        const modal = document.getElementById("settingsModal");
+        const saveBtn = document.getElementById("saveSettings");
+        const cancelBtn = document.getElementById("cancelSettings");
+        const diffBtns = document.querySelectorAll(".diff-btn");
+        const startGameLink = document.getElementById("startGameLink");
+        /* ===== 1. 正式配置 ===== */
+        let officialSettings = {
+            difficulty: [1, 2, 3, 4, 5]   // 第一次默认值
+        };
+
+        /* ===== 2. 打开设置 ===== */
+        openSettingsBtn.onclick = () => {
+            // 每次打开都用「正式值」初始化弹窗
+            tempSettings = { ...officialSettings };          // 深拷贝
+            syncModalFrom(tempSettings);                   // 把值刷到界面
+            modal.style.display = "flex";
+        };
+
+        /* ===== 3. 弹窗里用的临时变量 ===== */
+        let tempSettings = null;   // 只在弹窗打开时存在
+
+        /* ===== 4. 把内存对象同步到界面 ===== */
+        function syncModalFrom(obj) {
+            // 难度按钮
+            diffBtns.forEach(btn => {
+                const v = parseInt(btn.dataset.value);
+                btn.classList.toggle('active', obj.difficulty.includes(v));
+            });
+        }
+
+        /* ===== 5. 难度按钮点击（只改临时变量） ===== */
+        diffBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const v = parseInt(btn.dataset.value);
+                if (tempSettings.difficulty.includes(v)) {
+                    if (tempSettings.difficulty.length > 1)
+                        tempSettings.difficulty = tempSettings.difficulty.filter(x => x !== v);
+                } else {
+                    tempSettings.difficulty.push(v);
+                }
+                syncModalFrom(tempSettings);   // 立即刷新按钮样式
+            });
+        });
+
+        /* ===== 6. 保存 ===== */
+        saveBtn.onclick = () => {
+            officialSettings = { ...tempSettings };  // 正式值更新
+            modal.style.display = "none";
+        };
+
+        /* ===== 7. 取消 ===== */
+        cancelBtn.onclick = () => {
+            modal.style.display = "none";  // 什么都不改，直接关
+        };
+
+        /* ===== 8. 开始游戏链接只用正式值 ===== */
+        startGameLink.onclick = (e) => {
+            e.preventDefault();
+            const url = "{{ url_for('start_game') }}" +
+                "?difficulty=" + encodeURIComponent(officialSettings.difficulty.join(","));
+            window.location.href = url;
+        };
+    </script>
+</body>
+
+</html>

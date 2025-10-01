@@ -451,7 +451,59 @@
                     <img src="/static/icons/qun.png" alt="群">
                     <img src="/static/icons/jin.png" alt="晋">
                 </div>
-                <button id="closeModal">返回</button>
+                <button id="closeModal" class="image-btn" style="margin-top: 20px;">
+                    <img src="/static/icons/btn_red.png" alt="返回按钮">
+                    <span>返回</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 在现有modal容器后添加体力修改弹窗 -->
+        <div id="hpModal" class="modal" style="display: flex;">
+            <div class="modal-content">
+                <!-- 体力值行 -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin: 15px 0;">
+                    <span style="font-weight: bold;">体力</span>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="btn" style="--btn-bg:url('/static/icons/blue_btn.png')" onclick="changeHp(-1)">
+                            <span>-</span>
+                        </div>
+                        <div class="btn" style="--btn-bg:url('/static/icons/blue_btn.png')" onclick="changeHp(1)">
+                            <span>+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 体力上限行 -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin: 15px 0;">
+                    <span style="font-weight: bold;">上限</span>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="btn" style="--btn-bg:url('/static/icons/blue_btn.png')" onclick="changeMaxHp(-1)">
+                            <span>-</span>
+                        </div>
+                        <div class="btn" style="--btn-bg:url('/static/icons/blue_btn.png')" onclick="changeMaxHp(1)">
+                            <span>+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 护甲值行 -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin: 15px 0;">
+                    <span style="font-weight: bold;">护甲</span>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="btn" style="--btn-bg:url('/static/icons/blue_btn.png')" onclick="changeArmor(-1)">
+                            <span>-</span>
+                        </div>
+                        <div class="btn" style="--btn-bg:url('/static/icons/blue_btn.png')" onclick="changeArmor(1)">
+                            <span>+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="confirmHpBtn" class="image-btn">
+                    <img src="/static/icons/btn_red.png" alt="确认按钮">
+                    <span>确认</span>
+                </button>
             </div>
         </div>
 
@@ -529,7 +581,7 @@
                     <span>翻面</span>
                 </button>
 
-                <button class="image-btn">
+                <button class="image-btn" id="hpButton">
                     <img src="/static/icons/yellow_btn.png" alt="体力按钮">
                     <span>体力</span>
                 </button>
@@ -657,6 +709,28 @@
                 identityModal.style.display = "none";
             });
         }
+
+        // 体力弹窗控制
+        const hpModal = document.getElementById("hpModal");
+        const hpButton = document.getElementById("hpButton");
+        const confirmHpBtn = document.getElementById("confirmHpBtn");
+
+        // 打开体力弹窗
+        hpButton.onclick = () => {
+            hpModal.style.display = "flex";
+        };
+
+        // 关闭体力弹窗
+        confirmHpBtn.onclick = () => {
+            hpModal.style.display = "none";
+        };
+
+        // 点击弹窗外部关闭
+        hpModal.addEventListener("click", (e) => {
+            if (e.target === hpModal) {
+                hpModal.style.display = "none";
+            }
+        });
 
         // === 势力选择 ===
         const factionIcon = document.getElementById("factionIcon");

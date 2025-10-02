@@ -42,7 +42,6 @@
             cursor: pointer;
             background: white;
             aspect-ratio: 1 / 1.4;
-            /* 宽:高 = 1:1.4 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -52,9 +51,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            /* 完整显示武将图片，不裁切 */
             background: #000;
-            /* 填充空白边框区域，避免透明 */
         }
 
         .card.selected {
@@ -81,7 +78,6 @@
         .image-btn img {
             display: block;
             width: 140px;
-            /* 根据 /static/icons/std_btn.png 的实际大小调整 */
             height: auto;
             transition: all 0.2s ease;
         }
@@ -96,7 +92,6 @@
             font-weight: bold;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
             pointer-events: none;
-            /* 不影响点击 */
         }
 
         .image-btn:active img {
@@ -107,6 +102,98 @@
         .image-btn:disabled img {
             filter: grayscale(100%) brightness(60%);
             cursor: not-allowed;
+        }
+
+        /* 新增主公武将选择样式 */
+        #zhugongGallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            /* 居中显示 */
+            margin-bottom: 20px;
+            /* 底部留出按钮空间 */
+            flex-grow: 1;
+            /* 让画廊占满可用空间 */
+        }
+
+        .zhugong-item {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: calc(30% - 10px);
+            /* 每行显示5个 (100%/5) */
+            box-sizing: border-box;
+        }
+
+        .zhugong-item img {
+            width: 100%;
+            /* 使用百分比宽度适应容器 */
+            height: auto;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .zhugong-item:hover {
+            transform: scale(1.05);
+        }
+
+        .zhugong-item.selected {
+            outline: 3px solid #ffcc00;
+            border-radius: 8px;
+        }
+
+        /* 修复信息框被modal遮挡问题 - 提高层级 */
+        .info-box {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffcc00;
+            border-radius: 6px;
+            padding: 8px;
+            width: 200px;
+            z-index: 10003;
+            /* 提高层级至modal之上 */
+            font-size: 14px;
+        }
+
+        /* 主公弹窗容器样式调整 */
+        #zhugongModal>div {
+            background: #7b7153;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            /* 添加flex布局 */
+            flex-direction: column;
+            /* 垂直排列 */
+            width: 100%;
+            /* 确保宽度正确 */
+        }
+
+        .info-box h3 {
+            margin: 0 0 5px 0;
+            color: #ffcc00;
+            border-bottom: 1px solid #fff;
+            padding-bottom: 3px;
+        }
+
+        .info-box p {
+            margin: 5px 0 0 0;
+            line-height: 1.4;
+        }
+
+        /* 弹窗底部按钮容器 */
+        .zhugong-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #3c6270;
         }
     </style>
 </head>
@@ -152,15 +239,15 @@
             <span>确认</span>
         </button>
 
-        <!-- 右下角浮动按钮 -->
+        <!-- 左下角浮动按钮 -->
         <div id="zhugongBtn" style="
     position: fixed;
-    right: 20px;
-    bottom: 80px;
+    left: 2vw;
+    bottom: 10vh;
     cursor: pointer;
     z-index: 10000;
 ">
-            <img src="/static/icons/zhu_gong_btn.png" alt="主公按钮" style="width:80px; height:auto;">
+            <img src="/static/icons/zhu_gong_btn.png" alt="主公按钮" style="width:100px; height:auto;">
         </div>
 
         <!-- 弹窗 -->
@@ -171,34 +258,164 @@
                 <h2 style="text-align:center; margin-bottom:20px;">常备主公武将</h2>
 
                 <div id="zhugongGallery" style="display:flex; flex-wrap:wrap; gap:12px;">
-                    <!-- 这里添加武将图片 -->
-                    <img src="/static/headders/090_liu_bei_headder.png"
-                        style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
-                    <img src="/static/headders/299_sun_quan_headder.png"
-                        style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
-                    <img src="/static/headders/246_cao_cao_headder.png"
-                        style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
-                    <!-- 示例分隔栏 -->
                     <div
                         style="width:100%; text-align:center; border-bottom:2px solid #3c6270; line-height:0.1em; margin:20px 0;">
-                        <span style="background:#7b7153; padding:0 10px;">分隔栏</span>
+                        <span style="background:#7b7153; padding:0 10px;">标准+神话再临</span>
+                    </div>
+                    <!-- 包装成带选择功能的容器 -->
+                    <div class="zhugong-item" data-id="090_liu_bei">
+                        <img src="/static/headders/090_liu_bei.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="299_sun_quan">
+                        <img src="/static/headders/299_sun_quan.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="246_cao_cao">
+                        <img src="/static/headders/246_cao_cao.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="096_liu_chan">
+                        <img src="/static/headders/096_liu_chan.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="247_cao_pi">
+                        <img src="/static/headders/247_cao_pi.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="271_dong_zhuo">
+                        <img src="/static/headders/271_dong_zhuo.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="281_yuan_shao">
+                        <img src="/static/headders/281_yuan_shao.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="283_zhang_jiao">
+                        <img src="/static/headders/283_zhang_jiao.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="296_sun_ce">
+                        <img src="/static/headders/296_sun_ce.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="297_sun_jian">
+                        <img src="/static/headders/297_sun_jian.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="298_sun_liang">
+                        <img src="/static/headders/298_sun_liang.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div
+                        style="width:100%; text-align:center; border-bottom:2px solid #3c6270; line-height:0.1em; margin:20px 0;">
+                        <span style="background:#7b7153; padding:0 10px;">一将成名</span>
+                    </div>
+                    <div class="zhugong-item" data-id="018_cao_rui">
+                        <img src="/static/headders/018_cao_rui.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="241_liu_xie">
+                        <img src="/static/headders/241_liu_xie.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div
+                        style="width:100%; text-align:center; border-bottom:2px solid #3c6270; line-height:0.1em; margin:20px 0;">
+                        <span style="background:#7b7153; padding:0 10px;">手杀谋攻篇</span>
+                    </div>
+                    <div class="zhugong-item" data-id="004_cao_cao_m">
+                        <img src="/static/headders/004_cao_cao_m.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="092_liu_bei_m">
+                        <img src="/static/headders/092_liu_bei_m.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="zhugong-item" data-id="155_sun_quan_m">
+                        <img src="/static/headders/155_sun_quan_m.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
                     </div>
 
-                    <img src="/static/headders/090_liu_bei_headder.png"
-                        style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
-                    <img src="/static/headders/090_liu_bei_headder.png"
-                        style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
-                </div>
+                    <div
+                        style="width:100%; text-align:center; border-bottom:2px solid #3c6270; line-height:0.1em; margin:20px 0;">
+                        <span style="background:#7b7153; padding:0 10px;">10周年与OL专属</span>
+                    </div>
+                    <div class="zhugong-item" data-id="015_cao_mao">
+                        <img src="/static/headders/015_cao_mao.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
 
-                <!-- 关闭按钮 -->
-                <div style="text-align:center; margin-top:20px;">
-                    <button onclick="document.getElementById('zhugongModal').style.display='none'"
-                        style="padding:8px 20px; border:none; border-radius:6px; background:#444; color:white; cursor:pointer;">
-                        关闭
-                    </button>
+                    <div class="zhugong-item" data-id="035_dong_zhuo_10">
+                        <img src="/static/headders/035_dong_zhuo_10.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="zhugong-item" data-id="200_yuan_shao_10">
+                        <img src="/static/headders/200_yuan_shao_10.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div
+                        style="width:100%; text-align:center; border-bottom:2px solid #3c6270; line-height:0.1em; margin:20px 0;">
+                        <span style="background:#7b7153; padding:0 10px;">线下专属</span>
+                    </div>
+                    <div class="zhugong-item" data-id="013_cao_fang_j">
+                        <img src="/static/headders/013_cao_fang_j.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="zhugong-item" data-id="060_han_sui_j">
+                        <img src="/static/headders/060_han_sui_j.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="zhugong-item" data-id="097_liu_hong_j">
+                        <img src="/static/headders/097_liu_hong_j.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="zhugong-item" data-id="098_liu_yan_j">
+                        <img src="/static/headders/098_liu_yan_j.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="zhugong-item" data-id="140_sima_yan">
+                        <img src="/static/headders/140_sima_yan.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="zhugong-item" data-id="148_sun_ce_j">
+                        <img src="/static/headders/148_sun_ce_j.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="zhugong-item" data-id="201_yuan_shao_j">
+                        <img src="/static/headders/201_yuan_shao_j.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+
+                    <div class="zhugong-item" data-id="310_liu_bei_x">
+                        <img src="/static/headders/310_liu_bei_x.png"
+                            style="width:100px; height:100px; object-fit:cover; border-radius:8px;">
+                    </div>
+                </div>
+                <div class="zhugong-actions">
+                    <span>
+                        <button id="zhugongConfirmBtn" class="image-btn" disabled>
+                            <img src="/static/icons/std_btn.png" alt="确认选择">
+                            <span>确认</span>
+                        </button>
+                        <button onclick="document.getElementById('zhugongModal').style.display='none'"
+                            class="image-btn">
+                            <img src="/static/icons/std_btn.png" alt="确认选择">
+                            <span>关闭</span>
+                        </button>
+                    </span>
+
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -234,18 +451,9 @@
         refreshSelection();
 
         // 确认
-        // 确认时带回身份
         confirmBtn.addEventListener("click", () => {
             if (!chosen) return;
-            fetch("{{ url_for('confirm_selection') }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ selected: chosen })
-            }).then(res => res.json()).then(data => {
-                if (data.success) {
-                    window.location.href = "{{ url_for('character') }}";
-                }
-            });
+            confirmSelection(chosen);
         });
 
         // 更换
@@ -265,7 +473,7 @@
             changeBtn.disabled = reserves.length === 0 || remainingChanges === 0;
         });
 
-        const role = "{{ role }}";  // 从后端传入的身份
+        const role = "{{ role }}";
         const roleToCard = {
             "主公": "/static/icons/identity_card_zhugong.png",
             "忠臣": "/static/icons/identity_card_zhongchen.png",
@@ -275,21 +483,200 @@
 
         const identityModal = document.getElementById("identityModal");
         const identityCard = document.getElementById("identityCard");
-
-        // 设置身份卡
         identityCard.src = roleToCard[role] || "";
 
-        // 点击黑色区域关闭
         identityModal.addEventListener("click", (e) => {
             if (e.target === identityModal) {
                 identityModal.style.display = "none";
             }
         });
 
-        // 点击“查看身份”时再次显示
         document.getElementById("viewIdentity").addEventListener("click", () => {
             identityModal.style.display = "flex";
         });
+
+        // 主公选将功能 - 新增代码
+        const zhugongModal = document.getElementById('zhugongModal');
+        const zhugongItems = document.querySelectorAll('.zhugong-item');
+        const zhugongConfirmBtn = document.getElementById('zhugongConfirmBtn');
+        let selectedZhugong = null;
+
+        // 主公武将信息数据 - 实际应用中可从后端获取
+        const zhugongInfo = {
+            "090_liu_bei": {
+                title: "界-刘备 4/4 蜀",
+                content: "仁德：传递关键牌并印基本牌；\n激将：蜀势力武将替你使用打出【杀】"
+            },
+            "299_sun_quan": {
+                title: "界-孙权 4/4 吴",
+                content: "制衡：通过弃牌与摸牌实现过牌；\n救援：吴势力武将回血可以改成你回血"
+            },
+            "246_cao_cao": {
+                title: "界-曹操 4/4 魏",
+                content: "奸雄：受伤害获得伤害牌；\n护驾：魏势力武将替你使用【闪】，魏势力武将出【闪】时你摸牌"
+            },
+            "096_liu_chan": {
+                title: "刘禅 3/3 蜀",
+                content: "享乐：被【杀】可以让对方弃牌；放权：跳过出牌阶段给队友回合；若愚：体力值最小时觉醒，获得激将"
+            },
+            "247_cao_pi": {
+                title: "曹丕 3/3 魏",
+                content: "行殇：获得死亡角色的牌；放逐：受到伤害后让人翻面；颂威：魏势力角色黑色判定牌让你摸牌"
+            },
+            "271_dong_zhuo": {
+                title: "界-董卓 8/8 群",
+                content: "酒池：黑桃牌当【酒】，【酒】【杀】临时失效崩坏；肉林：与女性角色间互有类强命；崩坏：减上限或体力值，直到体力值不为全场最大；暴虐：群势力角色造成伤害有机会回血摸黑桃牌"
+            },
+            "281_yuan_shao": {
+                title: "界-袁绍 4/4 群",
+                content: "乱击：大量使用目标-1的【万箭齐发】；血裔：群势力角色让你得到摸牌和加手牌上限的机会"
+            },
+            "296_sun_ce": {
+                title: "界-孙策 4/4 吴",
+                content: "激昂：出红【杀】和【决斗】摸牌，主动卖血回收这些牌；魂姿：体力值为1觉醒，获得英姿与英魂；制霸：吴势力角色拼点实现传牌"
+            },
+            "297_sun_jian": {
+                title: "界-孙坚 4/5 吴",
+                content: "英魂：让队友摸牌，敌人弃牌；武烈：通过主动卖血防止伤害；破虏：吴势力角色杀死或死亡可以摸牌，摸牌数递增"
+            },
+            "298_sun_liang": {
+                title: "界-孙亮 3/3 吴",
+                content: "溃诛：弃牌阶段弃牌可以让人补牌或造成伤害；掣政：你不能对打不到你的角色造成伤害，但有机会弃这些角色牌；立军：吴势力角色使用【杀】可以给你，你可以让他多刀"
+            },
+            "018_cao_rui": {
+                title: "曹叡 3/3 魏",
+                content: "恢拓：受伤害可以回血或摸牌；明鉴：通过给牌让人获得加强的额外回合；兴衰：进入濒死状态时魏势力角色可以掉血让你回血"
+            },
+            "241_liu_xie": {
+                title: "刘协 3/3 群",
+                content: "天命：成为【杀】目标可以摸牌；密诏：通过拼点让人出杀；坠廷：群势力和魏势力角色可以在条件达成后对你用【无懈】"
+            },
+            "004_cao_cao_m": {
+                title: "谋-曹操 4/4 魏",
+                content: "通过调整治世标记数量平衡奸雄技能和清正技能的收益。护驾：将伤害转移给魏势力角色"
+            },
+            "092_liu_bei_m": {
+                title: "谋-刘备 4/4 蜀",
+                content: "仁德：通过给牌获得标记，消耗标记印基本牌；章武：使用标记实现大爆发；激将：强制蜀势力角色用【杀】或跳过他的出牌阶段"
+            },
+            "155_sun_quan_m": {
+                title: "谋-孙权 4/4 吴",
+                content: "制衡：通过弃牌与摸牌实现过牌；统业：牌堆洗牌前有谋英姿和固政；救援：强制获得吴势力角色的装备牌并回血"
+            },
+            "015_cao_mao": {
+                title: "曹髦 3/4 魏",
+                content: "潜龙：受到伤害可以摸牌与控牌堆；忿肆：主动卖血或打直伤；决讨：依次使用牌堆底的牌直到无法使用，实现大爆发；助势：魏势力角色回血时可以让你摸牌"
+            },
+            "035_dong_zhuo_10": {
+                title: "星-董卓 5/5 群",
+                content: "威临：造成伤害有概率加伤；掌戎：强制打直伤或弃牌，但承担负面效果；豪首：群势力角色用【酒】让你回血"
+            },
+            "283_zhang_jiao": {
+                title: "界-张角 4/4 群",
+                content: "雷击：出【闪】或【闪电】可以判定，然后可以造成雷电伤害或回血；鬼道：用黑色手牌改判定；黄天：群势力角色可以给你【闪】或黑桃牌"
+            },
+
+            "200_yuan_shao_10": {
+                title: "星-袁绍 4/4 群",
+                content: "通过硝焰与骄妄配合造成火焰伤害；纵势：通过展示手牌定向印牌对特定角色使用；傲势：群势力角色可以给你牌令你发动纵势"
+            },
+            "013_cao_fang_j": {
+                title: "曹芳 3/4 魏",
+                content: "诏图：通过乐不思蜀给队友或敌人额外回合；惊惧：将其他角色的判定牌移到自己身上以使用基本牌；危坠：魏势力角色可以将黑色牌当【过河拆桥】对你用"
+            },
+            "060_han_sui_j": {
+                title: "韩遂 4/4 群",
+                content: "逆乱：定向打直伤或摸牌；互雠：对对你造成伤害的角色有加伤；皆盟：群势力角色有群势力角色数个马术"
+            },
+            "097_liu_hong_j": {
+                title: "刘洪 3/4 群",
+                content: "朝争：通过议事实现回血、掉血或摸牌；甚宠：给人飞扬跋扈，你死亡时其被断肠；聚敛：群势力角色额外摸牌，你可以获得每群势力角色一张牌"
+            },
+            "098_liu_yan_j": {
+                title: "刘焉 3/3 群",
+                content: "立牧：通过给自己【乐】实现多刀；图射：没有非基本牌后用牌摸牌；通绝：可以规避卡手牌，但减少摸牌收益"
+            },
+            "140_sima_yan": {
+                title: "司马炎 3/3 晋",
+                content: "举旗：通过改变转换技状态，实现过牌或多刀；封土：减少角色上限，分配额定回合；泰始：此技能无效"
+            },
+            "148_sun_ce_j": {
+                title: "梦-孙策 4/4 吴",
+                content: "獨行：进行多人【决斗】，目标所有牌可当【杀】；猘横：对用牌响应过你的角色有加伤；诈死：防止致命伤害，猘横变制衡；霸世：吴势力角色帮你打出【杀闪】"
+            },
+            "201_yuan_shao_j": {
+                title: "梦-袁绍 4/4 群",
+                content: "执盟：展示牌堆顶的牌，所有人博弈得到其中的牌；天予：可以在一定条件下获得伤害牌与装备；诛逆：投票选择被你多刀的目标；合志：群势力角色投票结果视为与你一致"
+            },
+            "310_liu_bei_x": {
+                title: "桃园挽歌-刘备 4/4 蜀",
+                content: "倾师：通过议事加距离或摸牌；夷临：给牌或获得其他角色牌时可以直接用；承命：复活一次，让一个蜀势力角色得到仁德"
+            },
+        };
+
+        // 主公武将点击事件
+        zhugongItems.forEach(item => {
+            item.addEventListener('click', function () {
+                // 移除其他选中项的高亮和信息框
+                zhugongItems.forEach(i => {
+                    i.classList.remove('selected');
+                    const infoBox = i.querySelector('.info-box');
+                    if (infoBox) infoBox.remove();
+                });
+
+                // 设置当前选中项
+                this.classList.add('selected');
+                selectedZhugong = this.dataset.id;
+
+                // 创建并显示信息框
+                const info = zhugongInfo[selectedZhugong] || { title: "未知武将", content: "暂无信息" };
+                const infoBox = document.createElement('div');
+                infoBox.className = 'info-box';
+                infoBox.innerHTML = `
+                    <h3>${info.title}</h3>
+                    <p>${info.content}</p>
+                `;
+                this.appendChild(infoBox);
+
+                // 启用确认按钮
+                zhugongConfirmBtn.disabled = false;
+            });
+        });
+
+        // 主公武将确认按钮事件
+        zhugongConfirmBtn.addEventListener('click', function () {
+            if (selectedZhugong) {
+                // 构造选中的武将路径，与主选将逻辑保持一致
+                const selectedImg = `images/${selectedZhugong}.png`;
+                confirmSelection(selectedImg);
+            }
+        });
+
+        // 主公按钮点击事件
+        document.getElementById('zhugongBtn').addEventListener('click', function () {
+            zhugongModal.style.display = 'flex';
+            // 重置选择状态
+            zhugongItems.forEach(i => {
+                i.classList.remove('selected');
+                const infoBox = i.querySelector('.info-box');
+                if (infoBox) infoBox.remove();
+            });
+            selectedZhugong = null;
+            zhugongConfirmBtn.disabled = true;
+        });
+
+        // 统一的确认选择函数
+        function confirmSelection(selected) {
+            fetch("{{ url_for('confirm_selection') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ selected: selected })
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    window.location.href = "{{ url_for('character') }}";
+                }
+            });
+        }
     </script>
 </body>
 

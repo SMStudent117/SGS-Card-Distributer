@@ -10,7 +10,7 @@ game_state = {
     "user_images": {},        # user_id -> 已选择的图片
     "assigned_images": set(), # 已最终分配出去的图片
     "shown_images": set(),    # 已经展示过的候选图片
-    "player_count": 2,
+    "player_count": 1,
     "current_players": set(),
     "user_roles": {},
     "round_finished": False   # 本局是否结束
@@ -172,7 +172,7 @@ def select():
         )
     else:
         return render_template(
-            "base_selecter.html",
+            "zhugong_selecter.html",
             heroCount=hero_count,
             candidates=selected_images,
             totalCount=len(selected_images),
@@ -187,12 +187,13 @@ def confirm_selection():
 
     data = request.get_json()
     selected = data.get("selected")
+    print(selected)
     if not selected:
         return jsonify({"error": "未选择武将"}), 400
 
-    # 必须在候选池里
+    """# 必须在候选池里
     if selected not in session.get("candidate_images", []):
-        return jsonify({"error": "非法选择"}), 400
+        return jsonify({"error": "非法选择"}), 400"""
 
     # 确保唯一性
     if selected in game_state["assigned_images"]:

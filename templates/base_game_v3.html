@@ -109,8 +109,6 @@
             /* 平滑切换 */
         }
 
-
-
         /* 中间角色图片区域，占满剩余宽度 */
         .character-area {
             flex: 1 1 auto;
@@ -154,9 +152,11 @@
             width: var(--side-min);
             min-width: var(--side-min);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 0.2rem;
+            position: relative;
         }
 
         .marker img {
@@ -164,6 +164,69 @@
             height: auto;
             max-height: calc(100% - 1rem);
             object-fit: contain;
+        }
+
+        /* 花色按钮样式更新 */
+        .suit-buttons {
+            position: absolute;
+            bottom: 5%;
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            gap: 5px;
+        }
+
+        .suit {
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+        }
+
+        .suit img {
+            display: block;
+            height: auto;
+            max-height: 12vh;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .suit span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(16px, 2vh, 24px);
+            font-weight: 700;
+            font-family: "隶书", "SimLi", "STKaiti", "KaiTi", serif;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+        }
+
+        /* 基础状态颜色 */
+        .suit.spade span,
+        .suit.club span {
+            color: gray;
+            opacity: 0.7;
+        }
+
+        .suit.heart span,
+        .suit.diamond span {
+            color: gray;
+            opacity: 0.7;
+        }
+
+        /* 激活状态颜色 */
+        .suit.active.spade span,
+        .suit.active.club span {
+            color: black;
+            opacity: 1;
+        }
+
+        .suit.active.heart span,
+        .suit.active.diamond span {
+            color: red;
+            opacity: 1;
         }
 
         .nav {
@@ -327,13 +390,31 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
         }
 
-        .btn-img {
-            height: var(--btn-size);
-            width: auto;
-            object-fit: contain;
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-drag: none;
+        /* 修改通用按钮文字样式，移除固定白色设置 */
+        button.image-btn span {
+            position: absolute;
+            font-weight: 700;
+            font-size: clamp(14px, 2vh, 20px);
+            font-family: "隶书", "SimLi", "STKaiti", "KaiTi", serif;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+        }
+
+        /* 为不同类型按钮设置文字颜色 */
+        /* 红色按钮文字保持白色 */
+        button.image-btn.red-btn span {
+            color: white;
+        }
+
+        /* 黄色按钮文字设置为深色 */
+        button.image-btn.yellow-btn span {
+            color: #ffffff;
+            /* 与黄色按钮背景搭配的深色 */
+        }
+
+        /* 蓝色按钮文字设置为白色 */
+        button.image-btn.blue-btn span {
+            color: white;
         }
 
         /* 通用按钮样式（红色 / 黄色） */
@@ -500,7 +581,7 @@
                     </div>
                 </div>
 
-                <button id="confirmHpBtn" class="image-btn">
+                <button id="confirmHpBtn" class="image-btn red-btn">
                     <img src="/static/icons/btn_red.png" alt="确认按钮">
                     <span>确认</span>
                 </button>
@@ -536,6 +617,25 @@
             <!-- 标记模块（右） -->
             <aside class="marker" aria-label="标记面板">
                 <img src="/static/icons/side_panel.png" alt="标记面板">
+                <!-- 花色按钮组 -->
+                <div class="suit-buttons">
+                    <div class="suit spade" onclick="this.classList.toggle('active')">
+                        <img src="/static/icons/switch.png" alt="黑桃按钮">
+                        <span>♠</span>
+                    </div>
+                    <div class="suit heart" onclick="this.classList.toggle('active')">
+                        <img src="/static/icons/switch.png" alt="红桃按钮">
+                        <span>♥</span>
+                    </div>
+                    <div class="suit diamond" onclick="this.classList.toggle('active')">
+                        <img src="/static/icons/switch.png" alt="方片按钮">
+                        <span>♦</span>
+                    </div>
+                    <div class="suit club" onclick="this.classList.toggle('active')">
+                        <img src="/static/icons/switch.png" alt="梅花按钮">
+                        <span>♣</span>
+                    </div>
+                </div>
             </aside>
         </div>
 
@@ -571,17 +671,17 @@
 
             <!-- 操作模块 -->
             <div class="nav-section actions" aria-label="操作模块">
-                <button class="image-btn" id="tapButton">
+                <button class="image-btn yellow-btn" id="tapButton">
                     <img src="/static/icons/yellow_btn.png" alt="横置按钮">
                     <span>横置</span>
                 </button>
 
-                <button class="image-btn" id="flipButton">
+                <button class="image-btn yellow-btn" id="flipButton">
                     <img src="/static/icons/yellow_btn.png" alt="翻面按钮">
                     <span>翻面</span>
                 </button>
 
-                <button class="image-btn" id="hpButton">
+                <button class="image-btn yellow-btn" id="hpButton">
                     <img src="/static/icons/yellow_btn.png" alt="体力按钮">
                     <span>体力</span>
                 </button>

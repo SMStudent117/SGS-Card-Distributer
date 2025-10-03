@@ -10,9 +10,7 @@
             --bg: #0f0f0f;
             --nav-bg: #1E1919;
             --gap: 1rem;
-            /* 导航高度根据屏幕自适应，使用 clamp 保证在合理范围 */
             --nav-height: clamp(72px, 14vh, 120px);
-            /* 左右侧栏宽度范围 */
             --side-min: clamp(120px, 20vw, 240px);
             --equip-item-height: clamp(36px, 7vh, 80px);
             --btn-size: clamp(36px, 6.5vh, 72px);
@@ -30,14 +28,12 @@
             overflow: hidden;
             background: url('/static/icons/datingbg.png') no-repeat center center;
             background-size: cover;
-            /* 背景全屏铺满 */
             font-family: sans-serif;
             color: white;
             display: flex;
             flex-direction: column;
         }
 
-        /* 整体容器：竖直分布，上部分自适应填充，底部导航固定高度 */
         .app {
             min-height: 100vh;
             display: flex;
@@ -46,7 +42,6 @@
             box-sizing: border-box;
         }
 
-        /* 顶部区域高度 = 100vh - nav height */
         .top {
             display: flex;
             gap: var(--gap);
@@ -54,7 +49,6 @@
             box-sizing: border-box;
             align-items: center;
             height: calc(100vh - var(--nav-height));
-            /* 避免超高滚动：允许内部溢出滚动（如果非常窄） */
             overflow: hidden;
         }
 
@@ -81,10 +75,8 @@
             font-size: clamp(12px, 2.5vh, 18px);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
             pointer-events: none;
-            /* 文字不阻挡点击 */
         }
 
-        /* 装备模块：竖直六张装备图 */
         .equipment-module {
             display: flex;
             flex-direction: column;
@@ -102,14 +94,10 @@
             max-height: 14vh;
             object-fit: contain;
             opacity: 0.2;
-            /* 默认 70% 透明 */
             cursor: pointer;
-            /* 鼠标提示可点击 */
             transition: opacity 0.2s ease-in-out;
-            /* 平滑切换 */
         }
 
-        /* 中间角色图片区域，占满剩余宽度 */
         .character-area {
             flex: 1 1 auto;
             position: relative;
@@ -124,15 +112,12 @@
             overflow: hidden;
         }
 
-        /* 对后端片段中 img 的 id/class 做样式控制 */
         #characterImage,
         .character-card {
-            /* 关键：优先填满高度（100%），保持宽高比；如果宽度超出则会被容器限制 */
             height: 100%;
             width: auto;
             max-width: 100%;
             object-fit: contain;
-            /* 保持不裁切 */
             display: block;
             user-select: none;
             -webkit-user-drag: none;
@@ -147,7 +132,6 @@
             justify-content: center;
         }
 
-        /* 右侧标记模块 */
         .marker {
             width: var(--side-min);
             min-width: var(--side-min);
@@ -166,7 +150,55 @@
             object-fit: contain;
         }
 
-        /* 花色按钮样式更新 */
+        /* 新增标记容器样式 */
+        .marker-container {
+            position: absolute;
+            width: 90%;
+            height: 71%;
+            top: 12%;
+            left: 5%;
+            background: rgba(255, 255, 255, 0.0);
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .marker-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            background: #6a4c11;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            color: #000;
+        }
+
+        .marker-item .name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .marker-item .quantity {
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .marker-item button {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            margin: 0 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
         .suit-buttons {
             position: absolute;
             bottom: 5%;
@@ -174,6 +206,7 @@
             justify-content: space-around;
             width: 80%;
             gap: 5px;
+            z-index: 10;
         }
 
         .suit {
@@ -203,7 +236,6 @@
             pointer-events: none;
         }
 
-        /* 基础状态颜色 */
         .suit.spade span,
         .suit.club span {
             color: gray;
@@ -216,7 +248,6 @@
             opacity: 0.7;
         }
 
-        /* 激活状态颜色 */
         .suit.active.spade span,
         .suit.active.club span {
             color: black;
@@ -235,11 +266,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* 居中而不是分散 */
             padding: 0.3rem;
             box-sizing: border-box;
             gap: 0.25rem;
-            /* 缩小间距 */
             border-top: 1px solid rgba(255, 255, 255, 0.03);
         }
 
@@ -247,10 +276,8 @@
             display: flex;
             align-items: center;
             gap: 0.25rem;
-            /* 每个小模块内部的元素间距也缩小 */
         }
 
-        /* 信息模块（左）: 两张图片 + 一个"标记"按钮（图片背景） */
         .info-module img.icon {
             width: clamp(40px, 8vh, 64px);
             height: clamp(40px, 8vh, 64px);
@@ -280,7 +307,6 @@
             border-radius: 8px;
         }
 
-        /* 血量模块整体 */
         .hp-module {
             display: flex;
             align-items: center;
@@ -288,17 +314,13 @@
             border-radius: 10px;
         }
 
-        /* 控制血量模块内的勾玉 / 盾图标 */
         .hp-module img.ui {
             width: 8vh;
-            /* 按屏幕高度缩放，更适合移动端 */
             height: auto;
-            /* 保持比例 */
             object-fit: contain;
             vertical-align: middle;
         }
 
-        /* 蓝色按钮 */
         .hp-module .hp-btn {
             width: var(--btn-size);
             height: var(--btn-size);
@@ -319,38 +341,31 @@
             -webkit-user-drag: none;
         }
 
-        /* 中间内容区（勾玉、HP、护甲值、盾牌） */
         .hp-module .center-content {
             display: flex;
             align-items: center;
         }
 
-        /* 默认小间距 */
         .hp-module .center-content>* {
             margin-right: 0.25rem;
         }
 
-        /* 勾玉和 HP 之间极小间距 */
         .hp-module .center-content img.ui[alt="勾玉"] {
             margin-right: 0.05rem;
         }
 
-        /* HP 与护甲值之间小间距 */
         #hpValue {
             margin-right: 0.25rem;
         }
 
-        /* 护甲值与盾牌之间极小间距 */
         #armorValue {
             margin-right: 0.05rem;
         }
 
-        /* 盾牌和 + 按钮之间小间距 */
         .hp-module .center-content img.ui[alt="盾"] {
             margin-right: 0.25rem;
         }
 
-        /* 数值块样式 */
         .hp-display {
             display: flex;
             align-items: center;
@@ -363,7 +378,6 @@
             border-radius: 6px;
         }
 
-        /* 操作模块（右）: 3个黄色按钮 */
         .actions {
             display: flex;
             gap: 0.45rem;
@@ -390,7 +404,6 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
         }
 
-        /* 修改通用按钮文字样式，移除固定白色设置 */
         button.image-btn span {
             position: absolute;
             font-weight: 700;
@@ -400,27 +413,20 @@
             pointer-events: none;
         }
 
-        /* 为不同类型按钮设置文字颜色 */
-        /* 红色按钮文字保持白色 */
         button.image-btn.red-btn span {
             color: white;
         }
 
-        /* 黄色按钮文字设置为深色 */
         button.image-btn.yellow-btn span {
             color: #ffffff;
-            /* 与黄色按钮背景搭配的深色 */
         }
 
-        /* 蓝色按钮文字设置为白色 */
         button.image-btn.blue-btn span {
             color: white;
         }
 
-        /* 通用按钮样式（红色 / 黄色） */
         button.image-btn {
             background: none;
-            /* 去掉背景，直接用图片 */
             border: none;
             padding: 0;
             margin: 0;
@@ -433,18 +439,14 @@
             -webkit-user-drag: none;
         }
 
-        /* 按钮里的图片保持完整显示，不被裁剪 */
         button.image-btn img {
             display: block;
             height: auto;
             max-height: 12vh;
-            /* 根据屏幕高度缩放 */
             max-width: 100%;
             object-fit: contain;
-            /* 保证完整显示 */
         }
 
-        /* 按钮文字覆盖在图片上 */
         button.image-btn span {
             position: absolute;
             color: white;
@@ -481,7 +483,34 @@
             margin-bottom: 20px;
         }
 
-        /* 小屏或窄高比调整：当高度特别小，减少一些元素大小 */
+        /* 标记弹窗样式 */
+        #markerModal .modal-content {
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .form-group {
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .form-group input {
+            padding: 5px;
+            width: 60%;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
         @media (max-height:420px) {
             :root {
                 --equip-item-height: 30px;
@@ -492,7 +521,6 @@
             }
         }
 
-        /* 强制横屏样式提示（如果用户竖屏访问） */
         @media (orientation:portrait) {
             .warning-landscape {
                 display: flex;
@@ -539,7 +567,7 @@
             </div>
         </div>
 
-        <!-- 在现有modal容器后添加体力修改弹窗 -->
+        <!-- 体力修改弹窗 -->
         <div id="hpModal" class="modal" style="display: flex;">
             <div class="modal-content">
                 <!-- 体力值行 -->
@@ -588,6 +616,31 @@
             </div>
         </div>
 
+        <!-- 新增标记弹窗 -->
+        <div id="markerModal" class="modal">
+            <div class="modal-content">
+                <h2>添加标记</h2>
+                <div class="form-group">
+                    <label for="markerName">标记名称:</label>
+                    <input type="text" id="markerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="markerQuantity">标记数量:</label>
+                    <input type="number" id="markerQuantity" min="0" value="1" required>
+                </div>
+                <div class="modal-buttons">
+                    <button id="cancelMarkerBtn" class="image-btn yellow-btn">
+                        <img src="/static/icons/yellow_btn.png" alt="取消按钮">
+                        <span>取消</span>
+                    </button>
+                    <button id="confirmMarkerBtn" class="image-btn red-btn">
+                        <img src="/static/icons/btn_red.png" alt="确认按钮">
+                        <span>确认</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="top">
             <!-- 装备记录模块（左） -->
             <div class="equipment-module">
@@ -610,13 +663,15 @@
                 <div style="color:white;">⚠️ 没有找到角色图片</div>
                 {% endif %}
 
-                <!-- 可选： 如果你想在中间再放一个 overlay 容器 -->
                 <div class="overlay" aria-hidden="true"></div>
             </main>
 
             <!-- 标记模块（右） -->
             <aside class="marker" aria-label="标记面板">
                 <img src="/static/icons/side_panel.png" alt="标记面板">
+                <!-- 新增标记容器 -->
+                <div class="marker-container" id="markerContainer"></div>
+                
                 <!-- 花色按钮组 -->
                 <div class="suit-buttons">
                     <div class="suit spade" onclick="this.classList.toggle('active')">
@@ -647,7 +702,7 @@
                 <img class="icon" id="identityIcon"
                     src="{% if role == '主公' %}/static/icons/identity-zhugong.png{% else %}/static/icons/identity-unkonwn.png{% endif %}"
                     alt="身份">
-                <button class="image-btn">
+                <button class="image-btn" id="addMarkerBtn">
                     <img src="/static/icons/btn_red.png" alt="标记按钮">
                     <span>标记</span>
                 </button>
@@ -689,7 +744,7 @@
         </nav>
     </div>
 
-    <!-- 可选：提示竖屏用户切换到横屏 -->
+    <!-- 竖屏提示 -->
     <div class="warning-landscape" style="display:none;">
         建议横屏查看界面（请将设备横置）<br><small>为获得最佳体验，请使用手机横向模式。</small>
     </div>
@@ -701,6 +756,7 @@
         let armor = 0;
         let isTapped = false;
         let isFlipped = false;
+        let markerId = 0; // 用于标记唯一ID
 
         function handleOrientation() {
             const warn = document.querySelector('.warning-landscape');
@@ -714,7 +770,7 @@
         window.addEventListener('resize', handleOrientation);
         handleOrientation();
 
-        // 防止图片被拖拽（更舒服的触摸体验）
+        // 防止图片被拖拽
         document.addEventListener('dragstart', function (e) { if (e.target.tagName === 'IMG') e.preventDefault(); });
 
         const charImg = document.getElementById("characterImage");
@@ -815,17 +871,14 @@
         const hpButton = document.getElementById("hpButton");
         const confirmHpBtn = document.getElementById("confirmHpBtn");
 
-        // 打开体力弹窗
         hpButton.onclick = () => {
             hpModal.style.display = "flex";
         };
 
-        // 关闭体力弹窗
         confirmHpBtn.onclick = () => {
             hpModal.style.display = "none";
         };
 
-        // 点击弹窗外部关闭
         hpModal.addEventListener("click", (e) => {
             if (e.target === hpModal) {
                 hpModal.style.display = "none";
@@ -856,6 +909,85 @@
                 }
             });
         });
+
+        // === 新增标记功能 ===
+        const markerModal = document.getElementById("markerModal");
+        const addMarkerBtn = document.getElementById("addMarkerBtn");
+        const cancelMarkerBtn = document.getElementById("cancelMarkerBtn");
+        const confirmMarkerBtn = document.getElementById("confirmMarkerBtn");
+        const markerContainer = document.getElementById("markerContainer");
+        const markerNameInput = document.getElementById("markerName");
+        const markerQuantityInput = document.getElementById("markerQuantity");
+
+        // 打开标记弹窗
+        addMarkerBtn.onclick = () => {
+            markerNameInput.value = "";
+            markerQuantityInput.value = "1";
+            markerModal.style.display = "flex";
+        };
+
+        // 关闭标记弹窗（取消）
+        cancelMarkerBtn.onclick = () => {
+            markerModal.style.display = "none";
+        };
+
+        // 确认添加标记
+        confirmMarkerBtn.onclick = () => {
+            const name = markerNameInput.value.trim();
+            const quantity = parseInt(markerQuantityInput.value, 10);
+
+            if (!name || isNaN(quantity) || quantity < 0) {
+                alert("请输入有效的标记名称和数量");
+                return;
+            }
+
+            addMarkerItem(name, quantity);
+            markerModal.style.display = "none";
+        };
+
+        // 点击弹窗外部关闭
+        markerModal.addEventListener("click", (e) => {
+            if (e.target === markerModal) {
+                markerModal.style.display = "none";
+            }
+        });
+
+        // 添加标记项到容器
+        function addMarkerItem(name, quantity) {
+            const itemId = `marker-${markerId++}`;
+            const item = document.createElement("div");
+            item.className = "marker-item";
+            item.id = itemId;
+            item.innerHTML = `
+                <span class="name">${name}</span>
+                <span class="quantity">${quantity}</span>
+                <button class="decrease-btn" onclick="changeMarkerQuantity('${itemId}', -1)">-</button>
+                <button class="increase-btn" onclick="changeMarkerQuantity('${itemId}', 1)">+</button>
+                <button class="delete-btn" onclick="deleteMarker('${itemId}')">×</button>
+            `;
+            markerContainer.appendChild(item);
+        }
+
+        // 修改标记数量
+        function changeMarkerQuantity(itemId, delta) {
+            const item = document.getElementById(itemId);
+            if (!item) return;
+            
+            const quantityEl = item.querySelector(".quantity");
+            let quantity = parseInt(quantityEl.textContent, 10);
+            quantity = Math.max(0, quantity + delta);
+            quantityEl.textContent = quantity;
+        }
+
+        // 删除标记（带二次确认）
+        function deleteMarker(itemId) {
+            if (confirm("确定要删除这个标记吗？")) {
+                const item = document.getElementById(itemId);
+                if (item) {
+                    markerContainer.removeChild(item);
+                }
+            }
+        }
 
         updateHpDisplay();
         updateArmorDisplay();

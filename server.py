@@ -13,6 +13,7 @@ game_state = {
     "player_count": 1,
     "current_players": set(),
     "user_roles": {},
+    "user_status": {},        # user_id -> 状态 ("lobby", "choosing", "in_game")
     "round_finished": False   # 本局是否结束
 }
 
@@ -66,6 +67,7 @@ def init_new_game_if_needed():
         game_state["user_images"].clear()
         game_state["current_players"].clear()
         game_state["user_roles"].clear()
+        game_state["user_status"].clear()  # 清空用户状态
         game_state["round_finished"] = False
         print("⚡ 新的一局开始，所有身份和角色记录已清空")
 
@@ -95,13 +97,21 @@ def print_available_images():
 
 @app.route('/')
 def start():
+    user_id = session.get("user_id")
+    # 新用户首次访问，分配uuid并设置状态为lobby
+    if not user_id:
+        user_id = str(uuid4())
+        session['user_id'] = user_id
+        game_state["user_status"][user_id] = "lobby"
+        game_state["current_players"].add(user_id)
     return render_template("base_starter.html")
 
 
 @app.route('/start_game')
 def start_game():
-    user_id = str(uuid4())
-    session['user_id'] = user_id
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for('start'))
 
     # 获取参数
     difficulty = request.args.get("difficulty", default="1,2,3,4,5")
@@ -128,7 +138,8 @@ def start_game():
         if remaining_roles:
             game_state["user_roles"][user_id] = random.choice(remaining_roles)
 
-    # 跳转到选择界面
+    # 设置状态为choosing并跳转到选择界面
+    game_state["user_status"][user_id] = "choosing"
     return redirect(url_for('select'))
 
 
@@ -139,7 +150,11 @@ def select():
     if not user_id or not settings:
         return redirect(url_for("start"))
 
-    # 如果用户已经确认过选择，禁止回到选择界面
+    # 检查用户状态，非choosing状态不允许访问
+    if game_state["user_status"].get(user_id) != "choosing":
+        return redirect(url_for("start"))
+
+    # 如果用户已经确认过选择，禁止停留在选择界面
     if user_id in game_state["user_images"]:
         return redirect(url_for("character"))
 
@@ -185,15 +200,15 @@ def confirm_selection():
     if not user_id:
         return redirect(url_for("start"))
 
+    # 检查用户状态
+    if game_state["user_status"].get(user_id) != "choosing":
+        return jsonify({"error": "无效的操作状态"}), 400
+
     data = request.get_json()
     selected = data.get("selected")
     print(selected)
     if not selected:
         return jsonify({"error": "未选择武将"}), 400
-
-    """# 必须在候选池里
-    if selected not in session.get("candidate_images", []):
-        return jsonify({"error": "非法选择"}), 400"""
 
     # 确保唯一性
     if selected in game_state["assigned_images"]:
@@ -215,6 +230,9 @@ def confirm_selection():
             role = random.choice(remaining_roles)
             game_state["user_roles"][user_id] = role
 
+    # 更新状态为in_game
+    game_state["user_status"][user_id] = "in_game"
+
     if len(game_state["user_images"]) >= game_state["player_count"]:
         game_state["round_finished"] = True
         print("✅ 所有人已选完，等待下一局开始")
@@ -225,10 +243,21 @@ def confirm_selection():
 @app.route('/resume_game')
 def resume_game():
     user_id = session.get("user_id")
-    if user_id and user_id in game_state["user_images"]:
+    if not user_id:
+        flash("⚠️ 没有找到已保存的游戏，请先点击开始游戏")
+        return redirect(url_for('start'))
+
+    # 根据用户状态处理不同的恢复逻辑
+    status = game_state["user_status"].get(user_id)
+    if status == "lobby":
+        flash("⚠️ 没有找到已保存的游戏，请先点击开始游戏")
+        return redirect(url_for('start'))
+    elif status == "choosing":
+        return redirect(url_for('select'))
+    elif status == "in_game":
         return redirect(url_for('character'))
     else:
-        flash("⚠️ 没有找到已保存的游戏，请先点击开始游戏")
+        flash("⚠️ 状态异常，请重新开始游戏")
         return redirect(url_for('start'))
 
 
@@ -236,6 +265,10 @@ def resume_game():
 def character():
     user_id = session.get("user_id")
     if not user_id:
+        return redirect(url_for("start"))
+
+    # 检查用户状态
+    if game_state["user_status"].get(user_id) != "in_game":
         return redirect(url_for("start"))
 
     chosen = game_state["user_images"].get(user_id)

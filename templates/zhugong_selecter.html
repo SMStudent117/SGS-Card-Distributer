@@ -25,7 +25,6 @@
         .gallery {
             display: flex;
             flex-wrap: nowrap;
-            justify-content: center;
             gap: 15px;
             padding: 20px;
             overflow-x: auto;
@@ -41,21 +40,19 @@
             transition: border 0.2s ease;
             cursor: pointer;
             background: white;
-            aspect-ratio: 1 / 1.4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .card img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            /* 完整显示武将图片，不裁切 */
             background: #000;
+            /* 填充空白边框区域，避免透明 */
         }
 
         .card.selected {
-            border: 4px solid #ffcc00;
+            border: 4px solid #ff0000;
         }
 
         .actions {
@@ -475,10 +472,10 @@
 
         const role = "{{ role }}";
         const roleToCard = {
-            "主公": "/static/icons/identity_card_zhugong.png",
-            "忠臣": "/static/icons/identity_card_zhongchen.png",
-            "反贼": "/static/icons/identity_card_fanzei.png",
-            "内奸": "/static/icons/identity_card_neijian.png"
+            "主公": "/static/icons/identity_card_zhugong.jpg",
+            "忠臣": "/static/icons/identity_card_zhongchen.jpg",
+            "反贼": "/static/icons/identity_card_fanzei.jpg",
+            "内奸": "/static/icons/identity_card_neijian.jpg"
         };
 
         const identityModal = document.getElementById("identityModal");

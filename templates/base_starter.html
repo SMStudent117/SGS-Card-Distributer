@@ -2,7 +2,8 @@
 <html lang="zh">
 
 <head>
-    <meta charset="UTF-8">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#007bff">
     <title>游戏启动界面</title>
     <style>
         body {
@@ -24,14 +25,15 @@
             background-size: contain;
             /* 保持比例，适应容器大小 */
             background-color: transparent;
-            
+
 
             width: 600px;
             /* 可以按需要固定宽高 */
             height: 400px;
             /* 不缩放时要给个尺寸，否则只有内容大小 */
             display: flex;
-            flex-direction: column;   /* 垂直排列 */
+            flex-direction: column;
+            /* 垂直排列 */
             justify-content: flex-end;
             align-items: center;
             padding-bottom: 60px;
@@ -295,6 +297,14 @@
                 "?difficulty=" + encodeURIComponent(officialSettings.difficulty.join(","));
             window.location.href = url;
         };
+
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", function () {
+                navigator.serviceWorker.register("/static/service-worker.js")
+                    .then((reg) => console.log("✅ Service Worker 注册成功:", reg))
+                    .catch((err) => console.error("❌ Service Worker 注册失败:", err));
+            });
+        }
     </script>
 </body>
 

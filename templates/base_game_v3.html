@@ -511,6 +511,36 @@
             margin-top: 20px;
         }
 
+        /* 左上角四分之一圆全屏按钮 */
+        .corner-fullscreen-btn {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 60px;
+            height: 60px;
+            background-color: #3E2A14;
+            /* 深棕色 */
+            color: #C9A56D;
+            /* 浅棕色字体 */
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-bottom-right-radius: 100%;
+            cursor: pointer;
+            z-index: 9999;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .corner-fullscreen-btn:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .corner-fullscreen-btn:active {
+            transform: scale(0.95);
+        }
+
         @media (max-height:420px) {
             :root {
                 --equip-item-height: 30px;
@@ -540,6 +570,7 @@
 </head>
 
 <body>
+    <button id="fullscreenButton" class="corner-fullscreen-btn">全</button>
     <div class="app" id="appRoot">
         <!-- 身份弹窗（初始隐藏） -->
         <div id="identityModal" style="display:none; 
@@ -671,7 +702,7 @@
                 <img src="/static/icons/side_panel.png" alt="标记面板">
                 <!-- 新增标记容器 -->
                 <div class="marker-container" id="markerContainer"></div>
-                
+
                 <!-- 花色按钮组 -->
                 <div class="suit-buttons">
                     <div class="suit spade" onclick="this.classList.toggle('active')">
@@ -845,10 +876,10 @@
         const identityCard = document.getElementById("identityCard");
 
         const roleToCard = {
-            "主公": "/static/icons/identity_card_zhugong.png",
-            "忠臣": "/static/icons/identity_card_zhongchen.png",
-            "反贼": "/static/icons/identity_card_fanzei.png",
-            "内奸": "/static/icons/identity_card_neijian.png"
+            "主公": "/static/icons/identity_card_zhugong.jpg",
+            "忠臣": "/static/icons/identity_card_zhongchen.jpg",
+            "反贼": "/static/icons/identity_card_fanzei.jpg",
+            "内奸": "/static/icons/identity_card_neijian.jpg"
         };
 
         if (identityIcon) {
@@ -972,7 +1003,7 @@
         function changeMarkerQuantity(itemId, delta) {
             const item = document.getElementById(itemId);
             if (!item) return;
-            
+
             const quantityEl = item.querySelector(".quantity");
             let quantity = parseInt(quantityEl.textContent, 10);
             quantity = Math.max(0, quantity + delta);
@@ -991,6 +1022,45 @@
 
         updateHpDisplay();
         updateArmorDisplay();
+
+        // === 全屏功能 ===
+        const fullscreenButton = document.getElementById("fullscreenButton");
+
+        function enterFullscreen() {
+            const el = document.documentElement;
+            if (el.requestFullscreen) {
+                el.requestFullscreen();
+            } else if (el.webkitRequestFullscreen) { // Safari
+                el.webkitRequestFullscreen();
+            } else if (el.msRequestFullscreen) { // IE/Edge 旧版
+                el.msRequestFullscreen();
+            }
+        }
+
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+
+        fullscreenButton.addEventListener("click", () => {
+            const isFullscreen =
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.msFullscreenElement;
+
+            if (!isFullscreen) {
+                enterFullscreen();
+                fullscreenButton.textContent = "退";
+            } else {
+                exitFullscreen();
+                fullscreenButton.textContent = "全";
+            }
+        });
     </script>
 </body>
 

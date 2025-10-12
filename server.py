@@ -36,7 +36,7 @@ def generate_roles(player_count):
     if player_count == 1:
         return ["主公"]
     # 其他人数规则可以自行扩展
-    return ["主公", "忠臣", "反贼", "内奸"][:player_count]
+    return ["主公", "忠臣", "反贼", "  内奸"][:player_count]
 
 def get_available_images(difficulty_list, exclude_shown=True):
     df = heroes_df[heroes_df["is_open"] == 1].copy()
@@ -174,7 +174,7 @@ def select():
 
         # 🚀 记录为已展示过的
         game_state["shown_images"].update(selected_images)
-
+        print_available_images()
     # 把身份传给前端
     role = game_state["user_roles"].get(user_id)
     if role != "主公":
@@ -217,8 +217,6 @@ def confirm_selection():
     # 保存选择
     game_state["user_images"][user_id] = selected
     game_state["assigned_images"].add(selected)
-
-    print_available_images()
 
     # 分配身份（保持原有逻辑）
     if user_id not in game_state["user_roles"]:

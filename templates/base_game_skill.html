@@ -642,6 +642,35 @@
                 right: -5vw;
             }
         }
+
+        /* 图片查看图片样式 */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: flex-end;
+            /* 图片底部与屏幕底部对齐 */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .image-viewer img {
+            max-height: calc(100% - 40px);
+            /* 预留底部边距 */
+            max-width: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .image-viewer.active {
+            display: flex;
+        }
     </style>
 </head>
 
@@ -772,6 +801,11 @@
 
                 <div class="overlay" aria-hidden="true"></div>
             </main>
+
+            <!-- 图片查看器 -->
+            <div id="imageViewer" class="image-viewer">
+                <img id="zoomedImage" src="" alt="放大的角色卡">
+            </div>
 
             <!-- 标记模块（右） -->
             <aside class="marker" aria-label="标记面板">
@@ -1202,7 +1236,42 @@
         });
 
         // === 全屏功能 ===
-        const fullscreenButton = document.getElementById("fullscreenButton");
+        // 图片放大查看功能
+        const characterImage = document.getElementById('characterImage');
+        const imageViewer = document.getElementById('imageViewer');
+        const zoomedImage = document.getElementById('zoomedImage');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+
+        // 点击角色图片时放大展示
+        characterImage?.addEventListener('click', () => {
+            // 设置放大图片的源
+            zoomedImage.src = characterImage.src;
+            // 显示图片查看器
+            imageViewer.classList.add('active');
+            // 触发全屏
+            if (!document.fullscreenElement) {
+                enterFullscreen();
+                fullscreenButton.textContent = "退";
+            }
+        });
+
+        // 点击背景退出放大查看
+        imageViewer.addEventListener('click', (e) => {
+            if (e.target === imageViewer) {
+                imageViewer.classList.remove('active');
+            }
+        });
+
+        // 按ESC键退出放大查看
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && imageViewer.classList.contains('active')) {
+                imageViewer.classList.remove('active');
+                if (document.fullscreenElement) {
+                    exitFullscreen();
+                    fullscreenButton.textContent = "全";
+                }
+            }
+        });
 
         function enterFullscreen() {
             const el = document.documentElement;

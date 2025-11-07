@@ -102,6 +102,35 @@
             filter: grayscale(100%) brightness(60%);
             cursor: not-allowed;
         }
+
+        /* 图片查看图片样式 */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: flex-end;
+            /* 图片底部与屏幕底部对齐 */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .image-viewer img {
+            max-height: calc(100% - 40px);
+            /* 预留底部边距 */
+            max-width: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .image-viewer.active {
+            display: flex;
+        }
     </style>
 </head>
 
@@ -118,6 +147,11 @@
             <img src="{{ url_for('static', filename=img.replace('images/', 'images_low/')) }}" alt="武将">
         </div>
         {% endfor %}
+    </div>
+
+    <!-- 图片查看器 -->
+    <div id="imageViewer" class="image-viewer">
+        <img id="zoomedImage" src="" alt="放大的角色卡">
     </div>
 
     <div class="status">
@@ -145,6 +179,10 @@
             <img src="/static/icons/std_btn.png" alt="确认">
             <span>确认</span>
         </button>
+        <button id="showBtn" class="image-btn" disabled>
+            <img src="/static/icons/std_btn.png" alt="确认">
+            <span>放大</span>
+        </button>
     </div>
 
     <script>
@@ -164,6 +202,7 @@
         const cards = () => document.querySelectorAll(".card");
         const confirmBtn = document.getElementById("confirmBtn");
         const changeBtn = document.getElementById("changeBtn");
+        const show_btn = document.getElementById('showBtn');
 
 
         function refreshSelection() {
@@ -173,6 +212,7 @@
                     card.classList.add("selected");
                     chosen = card.dataset.img;
                     confirmBtn.disabled = false;
+                    show_btn.disabled = false;
                     changeBtn.disabled = reserves.length === 0;
                 });
             });
@@ -236,6 +276,41 @@
         document.getElementById("viewIdentity").addEventListener("click", () => {
             identityModal.style.display = "flex";
         });
+
+        // 图片放大查看功能
+        const imageViewer = document.getElementById('imageViewer');
+        const zoomedImage = document.getElementById('zoomedImage');
+
+        // 点击角色图片时放大展示
+        show_btn?.addEventListener('click', () => {
+            // 设置放大图片的源
+            zoomedImage.src =  "static/" + chosen.replace('images/', 'images_low/');
+            // 显示图片查看器
+            imageViewer.classList.add('active');
+            // 触发全屏
+            if (!document.fullscreenElement) {
+                enterFullscreen();
+            }
+        });
+
+        // 点击背景退出放大查看
+        imageViewer.addEventListener('click', (e) => {
+            if (e.target === imageViewer) {
+                imageViewer.classList.remove('active');
+            }
+        });
+
+        // === 全屏功能 ===
+        function enterFullscreen() {
+            const el = document.documentElement;
+            if (el.requestFullscreen) {
+                el.requestFullscreen();
+            } else if (el.webkitRequestFullscreen) { // Safari
+                el.webkitRequestFullscreen();
+            } else if (el.msRequestFullscreen) { // IE/Edge 旧版
+                el.msRequestFullscreen();
+            }
+        }
     </script>
 </body>
 

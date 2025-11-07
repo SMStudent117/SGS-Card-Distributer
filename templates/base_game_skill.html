@@ -566,6 +566,82 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* 左下角技能按钮 */
+        .skill-btn-container {
+            position: absolute;
+            left: 1vw;
+            bottom: var(--nav-height);
+            z-index: 10;
+        }
+
+        .skill-btn {
+            width: clamp(40px, 8vw, 80px);
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .skill-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* 技能展示模态框 */
+        .skill-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .skill-modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 80%;
+        }
+
+        .skill-image {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+
+        /* 导航按钮 */
+        .skill-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: clamp(40px, 8vw, 80px);
+            height: auto;
+            cursor: pointer;
+            filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+        }
+
+        .prev-btn {
+            left: -10vw;
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .next-btn {
+            right: -10vw;
+        }
+
+        /* 适配小屏幕 */
+        @media (max-width: 768px) {
+            .prev-btn {
+                left: -5vw;
+            }
+
+            .next-btn {
+                right: -5vw;
+            }
+        }
     </style>
 </head>
 
@@ -723,6 +799,20 @@
                     </div>
                 </div>
             </aside>
+        </div>
+
+        <!-- 左下角技能按钮（添加到<body>标签内，.app元素之前） -->
+        <div class="skill-btn-container">
+            <img src="/static/icons/ex_btn.png" alt="技能" class="skill-btn" id="skillButton">
+        </div>
+
+        <!-- 技能展示模态框（添加到其他模态框之后） -->
+        <div class="skill-modal" id="skillModal">
+            <div class="skill-modal-content">
+                <img src="/static/icons/arrow_btn.png" alt="上一张" class="skill-nav-btn prev-btn" id="prevSkill">
+                <img src="" alt="技能图片" class="skill-image" id="currentSkillImage">
+                <img src="/static/icons/arrow_btn.png" alt="下一张" class="skill-nav-btn next-btn" id="nextSkill">
+            </div>
         </div>
 
         <!-- 底部导航 -->
@@ -1022,6 +1112,94 @@
 
         updateHpDisplay();
         updateArmorDisplay();
+
+        // 技能展示相关逻辑
+        const skillButton = document.getElementById('skillButton');
+        const skillModal = document.getElementById('skillModal');
+        const currentSkillImage = document.getElementById('currentSkillImage');
+        const prevSkillBtn = document.getElementById('prevSkill');
+        const nextSkillBtn = document.getElementById('nextSkill');
+        let currentSkillIndex = 0;
+        // 从后端获取的技能图片列表（实际使用时会由后端注入）
+        const skills = {{ skills | safe }}; // 假设后端会处理为JSON格式
+
+        // 初始化技能导航按钮显示状态
+        function updateSkillNavButtons() {
+            if (skills.length <= 1) {
+                prevSkillBtn.style.display = 'none';
+                nextSkillBtn.style.display = 'none';
+            } else {
+                prevSkillBtn.style.display = 'block';
+                nextSkillBtn.style.display = 'block';
+                prevSkillBtn.style.visibility = currentSkillIndex === 0 ? 'hidden' : 'visible';
+                nextSkillBtn.style.visibility = currentSkillIndex === skills.length - 1 ? 'hidden' : 'visible';
+            }
+        }
+
+        // 显示当前技能图片
+        function showCurrentSkill() {
+            if (skills.length === 0) return;
+            currentSkillImage.src = skills[currentSkillIndex];
+            updateSkillNavButtons();
+        }
+
+        // 上一张技能
+        function prevSkill() {
+            if (currentSkillIndex > 0) {
+                currentSkillIndex--;
+                showCurrentSkill();
+            }
+        }
+
+        // 下一张技能
+        function nextSkill() {
+            if (currentSkillIndex < skills.length - 1) {
+                currentSkillIndex++;
+                showCurrentSkill();
+            }
+        }
+
+        // 打开技能模态框
+        skillButton.addEventListener('click', () => {
+            if (skills.length === 0) {
+                alert('没有技能图片可展示');
+                return;
+            }
+            currentSkillIndex = 0;
+            showCurrentSkill();
+            skillModal.style.display = 'flex';
+        });
+
+        // 关闭技能模态框
+        skillModal.addEventListener('click', (e) => {
+            if (e.target === skillModal) {
+                skillModal.style.display = 'none';
+            }
+        });
+
+        // 技能导航按钮事件
+        prevSkillBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            prevSkill();
+        });
+
+        nextSkillBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            nextSkill();
+        });
+
+        // 键盘导航支持
+        document.addEventListener('keydown', (e) => {
+            if (skillModal.style.display === 'flex') {
+                if (e.key === 'ArrowLeft') {
+                    prevSkill();
+                } else if (e.key === 'ArrowRight') {
+                    nextSkill();
+                } else if (e.key === 'Escape') {
+                    skillModal.style.display = 'none';
+                }
+            }
+        });
 
         // === 全屏功能 ===
         const fullscreenButton = document.getElementById("fullscreenButton");

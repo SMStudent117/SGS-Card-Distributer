@@ -17,8 +17,8 @@ game_state = {
     "round_finished": False   # 本局是否结束
 }
 
-GLOBAL_HERO_COUNT = 1          # 选将框数量
-GLOBAL_CHANGE_COUNT = 1        # 换将卡数量
+GLOBAL_HERO_COUNT = 5          # 选将框数量
+GLOBAL_CHANGE_COUNT = 5        # 换将卡数量
 # === 数据加载 ===
 # DATA_PATH = "C:/Users/33912/PycharmProjects/SGS/data/data_debug.xlsx"
 DATA_PATH = "C:/Users/33912/PycharmProjects/SGS/data/data_core.xlsx"

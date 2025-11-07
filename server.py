@@ -17,9 +17,10 @@ game_state = {
     "round_finished": False   # 本局是否结束
 }
 
-GLOBAL_HERO_COUNT = 5          # 选将框数量
-GLOBAL_CHANGE_COUNT = 5        # 换将卡数量
+GLOBAL_HERO_COUNT = 1          # 选将框数量
+GLOBAL_CHANGE_COUNT = 1        # 换将卡数量
 # === 数据加载 ===
+# DATA_PATH = "C:/Users/33912/PycharmProjects/SGS/data/data_debug.xlsx"
 DATA_PATH = "C:/Users/33912/PycharmProjects/SGS/data/data_core.xlsx"
 heroes_df = pd.read_excel(DATA_PATH)
 
@@ -296,6 +297,31 @@ def character():
                 image_file_a=image_file_a,
                 image_file_b=image_file_b,
                 role=role
+            )
+        if row["ui_style"] == 2:
+            # 1. 计算起始行（当前行id减5，至少为1）
+            start_id = max(hero_id - 5, 1)
+            # 获取从起始id开始的所有行（按id升序遍历）
+            # 假设id是连续的，这里通过id筛选实现从start_id开始遍历
+            filtered_df = heroes_df[heroes_df["id"] >= start_id].sort_values("id")
+
+            chosen_skills = []
+            # 2. 遍历查找符合条件的行
+            for idx, current_row in filtered_df.iterrows():
+                if current_row["parent_id"] == hero_id and current_row["id"] != current_row["parent_id"]:
+                    # 符合条件，合成图片路径
+                    skill_path = f"static/images/{current_row['id']:03d}_{current_row['file_name']}.png"
+                    chosen_skills.append(skill_path)
+                else:
+                    # 不符合条件，结束查找
+                    break
+
+            # 3. 渲染页面并传递skills参数
+            return render_template(
+                "base_game_skill.html",
+                image_file=chosen,
+                role=role,
+                skills=chosen_skills
             )
     except Exception as e:
         print("ui_style 检查失败:", e)

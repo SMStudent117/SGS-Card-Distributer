@@ -293,7 +293,7 @@ def character():
             image_file_b = f"images/{row2['id']:03d}_{row2['file_name']}.png"
 
             return render_template(
-                "main_ab.html",
+                "base_game_ab.html",
                 image_file_a=image_file_a,
                 image_file_b=image_file_b,
                 role=role
